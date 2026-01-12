@@ -161,7 +161,29 @@ bool dilemma_get_pointer_sniping_enabled(void) {
     return g_dilemma_config.is_sniping_enabled;
 }
 
+#    ifdef DILEMMA_AUTO_SNIPING_ON_LAYER
+// Spike detection: find and discard only the first stale CPI delta
+// When CPI changes (entering/exiting sniping), the Azoteq sensor may have stale
+// delta values buffered at the old scale, causing cursor jumps. This fix detects
+// and discards only the problematic spike without affecting normal movement.
+#        ifndef SPIKE_THRESHOLD
+#            define SPIKE_THRESHOLD 100
+#        endif // !SPIKE_THRESHOLD
+#        ifndef SPIKE_SCAN_FRAMES
+#            define SPIKE_SCAN_FRAMES 150
+#        endif // !SPIKE_SCAN_FRAMES
+static uint16_t g_frames_since_cpi_change = 0;
+static bool     g_spike_found             = false;
+static bool     g_cpi_change_pending      = false;
+#    endif     // DILEMMA_AUTO_SNIPING_ON_LAYER
+
 void dilemma_set_pointer_sniping_enabled(bool enable) {
+#    ifdef DILEMMA_AUTO_SNIPING_ON_LAYER
+    // Detect when sniping state actually changes to trigger spike detection
+    if (enable != g_dilemma_config.is_sniping_enabled) {
+        g_cpi_change_pending = true;
+    }
+#    endif // DILEMMA_AUTO_SNIPING_ON_LAYER
     g_dilemma_config.is_sniping_enabled = enable;
     maybe_update_pointing_device_cpi(&g_dilemma_config);
 }
@@ -214,6 +236,24 @@ static void pointing_device_task_dilemma(report_mouse_t* mouse_report) {
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     if (is_keyboard_master()) {
+#    ifdef DILEMMA_AUTO_SNIPING_ON_LAYER
+        // Reset spike detection when sniping state changes
+        if (g_cpi_change_pending) {
+            g_frames_since_cpi_change = 0;
+            g_spike_found             = false;
+            g_cpi_change_pending      = false;
+        }
+        // Detect and discard only the first stale CPI spike after CPI change
+        if (!g_spike_found && g_frames_since_cpi_change < SPIKE_SCAN_FRAMES) {
+            g_frames_since_cpi_change++;
+            int16_t magnitude = (mouse_report.x < 0 ? -mouse_report.x : mouse_report.x) + (mouse_report.y < 0 ? -mouse_report.y : mouse_report.y);
+            if (magnitude > SPIKE_THRESHOLD) {
+                g_spike_found = true;
+                mouse_report.x = 0;
+                mouse_report.y = 0;
+            }
+        }
+#    endif // DILEMMA_AUTO_SNIPING_ON_LAYER
         pointing_device_task_dilemma(&mouse_report);
         mouse_report = pointing_device_task_user(mouse_report);
     }
