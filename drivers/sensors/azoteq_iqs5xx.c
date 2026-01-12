@@ -91,6 +91,11 @@
 #    define AZOTEQ_IQS5XX_EVENT_MODE false
 #endif
 
+// Number of reports to discard after CPI change to prevent cursor jump from stale deltas
+#ifndef AZOTEQ_IQS5XX_CPI_CHANGE_DISCARD_FRAMES
+#    define AZOTEQ_IQS5XX_CPI_CHANGE_DISCARD_FRAMES 50
+#endif
+
 #define DIVIDE_UNSIGNED_ROUND(numerator, denominator) (((numerator) + ((denominator) / 2)) / (denominator))
 #define AZOTEQ_IQS5XX_INCH_TO_RESOLUTION_X(inch) (DIVIDE_UNSIGNED_ROUND((inch) * (uint32_t)AZOTEQ_IQS5XX_WIDTH_MM * 10, 254))
 #define AZOTEQ_IQS5XX_RESOLUTION_X_TO_INCH(px) (DIVIDE_UNSIGNED_ROUND((px) * (uint32_t)254, AZOTEQ_IQS5XX_WIDTH_MM * 10))
@@ -107,6 +112,9 @@ const pointing_device_driver_t azoteq_iqs5xx_pointing_device_driver = {
 #endif
 
 static uint16_t azoteq_iqs5xx_product_number = AZOTEQ_IQS5XX_UNKNOWN;
+
+// Counter to discard movement reports after CPI change to prevent cursor jump from stale deltas
+static uint8_t azoteq_iqs5xx_cpi_discard_count = 0;
 
 static struct {
     uint16_t resolution_x;
@@ -262,6 +270,9 @@ void azoteq_iqs5xx_set_cpi(uint16_t cpi) {
         resolution.x_resolution               = AZOTEQ_IQS5XX_SWAP_H_L_BYTES(MIN(azoteq_iqs5xx_device_resolution_t.resolution_x, AZOTEQ_IQS5XX_INCH_TO_RESOLUTION_X(cpi)));
         resolution.y_resolution               = AZOTEQ_IQS5XX_SWAP_H_L_BYTES(MIN(azoteq_iqs5xx_device_resolution_t.resolution_y, AZOTEQ_IQS5XX_INCH_TO_RESOLUTION_Y(cpi)));
         i2c_write_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_X_RESOLUTION, (uint8_t *)&resolution, sizeof(azoteq_iqs5xx_resolution_t), AZOTEQ_IQS5XX_TIMEOUT_MS);
+        // Set counter to discard stale movement data in upcoming reports
+        azoteq_iqs5xx_cpi_discard_count = AZOTEQ_IQS5XX_CPI_CHANGE_DISCARD_FRAMES;
+        pd_dprintf("IQS5XX - CPI changed to %d, discarding next %d reports\n", cpi, AZOTEQ_IQS5XX_CPI_CHANGE_DISCARD_FRAMES);
     }
 }
 
@@ -356,6 +367,13 @@ report_mouse_t azoteq_iqs5xx_get_report(report_mouse_t mouse_report) {
     azoteq_iqs5xx_base_data_t base_data       = {0};
     i2c_status_t              status          = azoteq_iqs5xx_get_base_data(&base_data);
     bool                      ignore_movement = false;
+
+    // Discard movement after CPI change to prevent cursor jump from stale deltas
+    if (azoteq_iqs5xx_cpi_discard_count > 0) {
+        azoteq_iqs5xx_cpi_discard_count--;
+        ignore_movement = true;
+        pd_dprintf("IQS5XX - Discarding movement, %d reports remaining\n", azoteq_iqs5xx_cpi_discard_count);
+    }
 
     if (status == I2C_STATUS_SUCCESS) {
 #ifdef POINTING_DEVICE_DEBUG
