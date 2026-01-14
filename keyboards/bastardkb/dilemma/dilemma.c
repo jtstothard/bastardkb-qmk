@@ -327,6 +327,17 @@ void eeconfig_init_kb(void) {
     g_dilemma_config.raw                 = 0;
     g_dilemma_config.pointer_default_dpi = 3; // DPI=1000
     write_dilemma_config_to_eeprom(&g_dilemma_config);
+
+    // Initialize VIA custom config defaults
+    g_via_dilemma_config.raw = 0;
+    g_via_dilemma_config.dpi_preset = 3; // 1000 DPI default
+    g_via_dilemma_config.drag_scroll_x_divisor = 8; // Reasonable defaults
+    g_via_dilemma_config.drag_scroll_y_divisor = 8;
+    g_via_dilemma_config.two_finger_x_divisor = 8;
+    g_via_dilemma_config.two_finger_y_divisor = 8;
+    g_via_dilemma_config.config_version = 1;
+    write_via_dilemma_config();
+
     maybe_update_pointing_device_cpi(&g_dilemma_config);
     eeconfig_init_user();
 }
@@ -427,6 +438,10 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
 
 void matrix_init_kb(void) {
     read_dilemma_config_from_eeprom(&g_dilemma_config);
+
+    // Initialize VIA custom config
+    read_via_dilemma_config();
+
     matrix_init_user();
 }
 #endif // POINTING_DEVICE_ENABLE
