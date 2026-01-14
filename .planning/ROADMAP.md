@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: VIA Configuration Integration** - Bridge VIA config to device behavior, DPI and scroll divisors
 - [x] **Phase 3: Basic Gesture Enablement** - Enable existing Azoteq gestures (tap, two-finger tap, scroll)
 - [x] **Phase 4: Advanced Gesture Support** - Three-finger swipes, four-finger swipes, pinch-to-zoom
-- [ ] **Phase 5: Gesture-to-Keycode Mapping** - VIA-configurable gesture actions mapping
+- [x] **Phase 5: Gesture-to-Keycode Mapping** - VIA-configurable gesture actions mapping
 - [ ] **Phase 6: Smart Gesture Features** - Tap-to-click with pressure, force click, smart zoom
 - [ ] **Phase 7: Auto-Sniping Toggle** - VIA-configurable layer-based sniping enable/disable
 - [ ] **Phase 8: VIA Menu UI Design** - Create VIA menus for all 30+ settings
@@ -86,9 +86,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: Add keycode fields to EEPROM for each gesture type
-- [ ] 05-02: Implement gesture keycode lookup and execution
-- [ ] 05-03: Implement VIA command for keycode selection per gesture
+- [x] 05-01: Add keycode fields to EEPROM for each gesture type
+- [x] 05-02: Implement gesture keycode lookup and execution
+- [x] 05-03: Implement VIA command for keycode selection per gesture
 
 ### Phase 6: Smart Gesture Features
 **Goal**: Tap-to-click with pressure detection, force click (long press), smart zoom gesture
@@ -161,7 +161,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. VIA Configuration Integration | 3/3 | Complete | 2026-01-14 |
 | 3. Basic Gesture Enablement | 4/4 | Complete | 2026-01-14 |
 | 4. Advanced Gesture Support | 5/5 | Complete | 2026-01-14 |
-| 5. Gesture-to-Keycode Mapping | 0/3 | Not started | - |
+| 5. Gesture-to-Keycode Mapping | 3/3 | Complete | 2026-01-14 |
 | 6. Smart Gesture Features | 0/4 | Not started | - |
 | 7. Auto-Sniping Toggle | 0/3 | Not started | - |
 | 8. VIA Menu UI Design | 0/3 | Not started | - |
