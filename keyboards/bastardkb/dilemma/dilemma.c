@@ -184,10 +184,8 @@ void dilemma_set_pointer_dragscroll_enabled(bool enable) {
 }
 
 void pointing_device_init_kb(void) {
-    dprintf("Dilemma: pointing_device_init_kb called - driver init starting\n");
     maybe_update_pointing_device_cpi(&g_dilemma_config);
     pointing_device_init_user();
-    dprintf("Dilemma: pointing_device_init_kb completed\n");
 }
 
 /**
@@ -224,10 +222,6 @@ static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     if (is_keyboard_master()) {
-        static uint32_t task_count = 0;
-        if (++task_count % 1000 == 0) {
-            dprintf("Dilemma: pointing_device_task_kb called %lu times, x=%d, y=%d\n", task_count, mouse_report.x, mouse_report.y);
-        }
         pointing_device_task_dilemma(&mouse_report);
         mouse_report = pointing_device_task_user(mouse_report);
     }
