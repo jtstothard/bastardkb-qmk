@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 4 of 12 (Advanced Gesture Support)
-Plan: 4 of 6 in current phase
-Status: Plan 04-04 complete - VIA command handlers for advanced gestures
-Last activity: 2026-01-14 — Completed Plan 04-04 (VIA Command Handlers for Advanced Gesture Support)
+Plan: 5 of 6 in current phase
+Status: Plan 04-05 complete - Pinch-to-zoom gesture detection
+Last activity: 2026-01-14 — Completed Plan 04-05 (Pinch-to-Zoom Gesture Detection)
 
-Progress: ██████████░ 85%
+Progress: ██████████░ 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 15 min
-- Total execution time: 4.0 hours
+- Total execution time: 4.25 hours
 
 **By Phase:**
 
@@ -30,7 +30,7 @@ Progress: ██████████░ 85%
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
-| 4. Advanced Gesture Support | 4 | 6 | 15 min (in progress) |
+| 4. Advanced Gesture Support | 5 | 6 | 15 min (in progress) |
 
 **Recent Trend:**
 - Last 5 plans: 04-04 (15 min), 04-03 (15 min), 04-02 (15 min), 04-01 (15 min), 03-04 (15 min)
@@ -170,6 +170,36 @@ Resume file: None
 - quantum/digitizer_mouse_fallback.c (+27 -12 lines: VIA config checks in swipe logic)
 
 **Summary:** .planning/phases/04-advanced-gesture-support/04-04-SUMMARY.md
+
+## Plan 04-05 Summary
+
+**Duration:** 15 minutes (8 tasks, 8 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added Zoom state to state machine enum
+2. ✅ Added zoom tracking variables (6 variables for distance and finger positions)
+3. ✅ Added zoom distance calculation helper function (calculate_squared_distance)
+4. ✅ Added zoom detection constants (timeout, threshold, 2 keycode defaults)
+5. ✅ Implemented Zoom state in state machine (complete pinch-to-zoom detection)
+6. ✅ Added Zoom state entry from Down state (2-finger gesture detection)
+7. ✅ Added VIA keycode overrides for zoom (zoom_in_keycode, zoom_out_keycode)
+8. ✅ Updated gesture state tracking for zoom (placeholder comment)
+
+**Key Achievements:**
+- Complete pinch-to-zoom gesture detection functional in firmware
+- Integer-only distance calculation using squared comparison (no sqrt)
+- VIA-configurable zoom keycodes with null checks
+- Two-finger tracking with threshold-based triggering
+- Timeout handling prevents stuck zoom state (300ms)
+- Sensible defaults (KC_EQUAL for zoom in, KC_MINUS for zoom out)
+- Firmware-level filtering via pinch_to_zoom_enabled check
+
+**Files Modified:**
+- quantum/digitizer_mouse_fallback.c (+118 lines: enum, variables, helper, constants, Zoom state, Down state entry, VIA overrides)
+- keyboards/bastardkb/dilemma/dilemma.c (+5 lines: gesture state placeholder update)
+
+**Summary:** .planning/phases/04-advanced-gesture-support/04-05-SUMMARY.md
 
 ## Plan 04-03 Summary
 
