@@ -186,6 +186,26 @@ bool dilemma_get_pointer_dragscroll_enabled(void) {
 void dilemma_set_pointer_dragscroll_enabled(bool enable) {
     g_dilemma_config.is_dragscroll_enabled = enable;
     maybe_update_pointing_device_cpi(&g_dilemma_config);
+    update_scroll_divisors();
+}
+
+/**
+ * \brief Update scroll divisors based on current mode and VIA config.
+ *
+ * Selects appropriate divisors from VIA config:
+ * - If dragscroll enabled: use drag_scroll_x/y_divisor
+ * - If dragscroll disabled: use two_finger_x/y_divisor
+ *
+ * Called on mode changes and VIA config updates to keep divisors in sync.
+ */
+static void update_scroll_divisors(void) {
+    if (g_dilemma_config.is_dragscroll_enabled) {
+        g_current_scroll_x_divisor = g_via_dilemma_config.drag_scroll_x_divisor;
+        g_current_scroll_y_divisor = g_via_dilemma_config.drag_scroll_y_divisor;
+    } else {
+        g_current_scroll_x_divisor = g_via_dilemma_config.two_finger_x_divisor;
+        g_current_scroll_y_divisor = g_via_dilemma_config.two_finger_y_divisor;
+    }
 }
 
 void pointing_device_init_kb(void) {
@@ -384,6 +404,27 @@ static uint16_t get_dpi_from_preset(uint8_t preset) {
         case 7:
         default:
             return 0; // Reserved/invalid
+    }
+}
+
+/**
+ * \brief Apply VIA config settings to pointing device hardware.
+ *
+ * Reads the current VIA dilemma config and applies the DPI preset to the
+ * pointing device. This bridges the gap between VIA config storage and
+ * actual device behavior.
+ *
+ * Called from:
+ * - matrix_init_kb() after loading VIA config on boot
+ * - VIA save handler after config changes
+ * - After DPI preset changes
+ *
+ * Follows the same pattern as maybe_update_pointing_device_cpi().
+ */
+static void apply_via_dilemma_config(void) {
+    uint16_t dpi = get_dpi_from_preset(g_via_dilemma_config.dpi_preset);
+    if (dpi > 0) {
+        pointing_device_set_cpi(dpi);
     }
 }
 
