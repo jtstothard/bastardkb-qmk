@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 7 of 12 (Auto-Sniping Toggle)
-Plan: 2 of 3 in current phase
-Status: In progress - Layer state auto-snipe logic implemented
-Last activity: 2026-01-14 — Completed Plan 07-02 (Layer State Auto-Snipe Logic)
+Plan: 3 of 3 in current phase
+Status: ✅ COMPLETE - Auto-sniping toggle fully implemented
+Last activity: 2026-01-14 — Completed Plan 07-03 (VIA Command Handlers)
 
-Progress: ██████████ 95%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
@@ -86,6 +86,70 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+## Plan 07-03 Summary
+
+**Duration:** 5 minutes (3 tasks, 3 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added auto-snipe VIA set handlers (IDs 25-26)
+2. ✅ Added auto-snipe VIA get handlers (IDs 25-26)
+3. ✅ Initialized auto-snipe defaults in eeconfig_init_kb()
+
+**Key Achievements:**
+- Complete VIA read/write interface for auto-snipe configuration
+- VIA value ID 25 (auto_snipe_enable) fully functional with validation
+- VIA value ID 26 (auto_snipe_layer) fully functional with validation
+- Input validation prevents config corruption (0-1 for enable, 0-127 for layer)
+- Sensible defaults: disabled by default (opt-in), layer 2
+- Follows existing VIA handler patterns from Phase 3/4
+
+**Technical Implementation:**
+- Set handlers validate input (boolean 0-1, layer 0-127)
+- Get handlers return current config values
+- Defaults: auto_snipe_enabled = 0, auto_snipe_layer = 2
+- Placed after zoom handlers in VIA command function
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.c (+22 lines: set/get handlers + defaults)
+
+**Summary:** .planning/phases/07-auto-sniping-toggle/07-03-SUMMARY.md
+
+## Phase 7 Complete Summary
+
+**Phase: Auto-Sniping Toggle**
+**Duration:** 15 minutes (3 plans, 5 tasks, 5 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Plans Completed:**
+1. ✅ 07-01: Auto-Snipe VIA Value IDs (2 min)
+   - Added VIA value IDs 25-26 (auto_snipe_enable, auto_snipe_layer)
+   - Mapped to existing EEPROM fields in Byte 5
+
+2. ✅ 07-02: Layer State Auto-Snipe Logic (5 min)
+   - Implemented layer_state_set_user() with auto-snipe logic
+   - Automatically enables/disables sniping based on layer changes
+   - VIA-configurable (respects auto_snipe_enabled and auto_snipe_layer)
+
+3. ✅ 07-03: VIA Command Handlers (5 min)
+   - Added VIA set handlers for IDs 25-26 with validation
+   - Added VIA get handlers for IDs 25-26
+   - Initialized defaults (disabled, layer 2)
+
+**Key Achievements:**
+- Complete auto-snipe feature functional
+- VIA-configurable enable/disable and target layer
+- Automatic sniping when entering configured layer
+- Automatic disable when leaving configured layer
+- Backward compatible (disabled by default, opt-in)
+- Safe implementation (checks state before enabling/disabling)
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.h (+4 lines: VIA value IDs)
+- keyboards/bastardkb/dilemma/dilemma.c (+53 lines: VIA handlers + layer logic + defaults)
+
+**Next Phase:** Phase 8 - Drag-Scroll Configuration
 
 ## Plan 07-02 Summary
 
