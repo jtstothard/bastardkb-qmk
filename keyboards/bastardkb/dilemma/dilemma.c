@@ -613,6 +613,18 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                 case id_dilemma_two_finger_y:
                     value_data[0] = g_via_dilemma_config.two_finger_y_divisor;
                     break;
+                case id_dilemma_tap_to_click_enable:
+                    value_data[0] = g_via_dilemma_config.tap_to_click_enabled;
+                    break;
+                case id_dilemma_two_finger_tap_enable:
+                    value_data[0] = g_via_dilemma_config.two_finger_tap_enabled;
+                    break;
+                case id_dilemma_two_finger_scroll_enable:
+                    value_data[0] = g_via_dilemma_config.two_finger_scroll_enabled;
+                    break;
+                case id_dilemma_press_and_hold_enable:
+                    value_data[0] = g_via_dilemma_config.press_and_hold_enabled;
+                    break;
                 // Add more getters for each value_id
                 default:
                     *command_id = id_unhandled;
