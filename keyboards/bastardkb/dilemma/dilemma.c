@@ -604,6 +604,10 @@ void eeconfig_init_kb(void) {
     g_via_dilemma_config.zoom_in_keycode = KC_EQUAL;
     g_via_dilemma_config.zoom_out_keycode = KC_MINUS;
 
+    // Auto-snipe defaults (Byte 5)
+    g_via_dilemma_config.auto_snipe_enabled = 0;  // OFF by default (opt-in feature)
+    g_via_dilemma_config.auto_snipe_layer = 2;     // Default to layer 2 (common sniping layer)
+
     g_via_dilemma_config.config_version = 1;
     write_via_dilemma_config();
 
