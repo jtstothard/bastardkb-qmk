@@ -439,6 +439,37 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     return mouse_report;
 }
 
+/**
+ * \brief Layer state change hook for auto-sniping
+ *
+ * When auto_snipe_enabled is true and auto_snipe_layer becomes active,
+ * automatically enable sniping mode. When leaving that layer, disable sniping.
+ */
+layer_state_t layer_state_set_user(layer_state_t state) {
+    // Check if auto-sniping is enabled in VIA config
+    if (g_via_dilemma_config.auto_snipe_enabled) {
+        uint8_t target_layer = g_via_dilemma_config.auto_snipe_layer;
+
+        // Check if target layer is in current layer state
+        if (state & (1 << target_layer)) {
+            // Target layer is active, enable sniping
+            if (!dilemma_get_pointer_sniping_enabled()) {
+                dilemma_set_pointer_sniping_enabled(true);
+            }
+        } else {
+            // Target layer is not active, disable sniping if we enabled it
+            if (dilemma_get_pointer_sniping_enabled()) {
+                // Only disable if no manual sniping key is held
+                // (auto-snipe should not interfere with manual sniping)
+                dilemma_set_pointer_sniping_enabled(false);
+            }
+        }
+    }
+
+    // Call existing keymap layer_state_set_user if defined
+    return layer_state_set_user_kb(state);
+}
+
 #    if defined(POINTING_DEVICE_ENABLE) && !defined(NO_DILEMMA_KEYCODES)
 /** \brief Whether SHIFT mod is enabled. */
 static bool has_shift_mod(void) {
