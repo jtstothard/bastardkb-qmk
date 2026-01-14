@@ -777,6 +777,18 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                 case id_dilemma_zoom_out_keycode:
                     g_via_dilemma_config.zoom_out_keycode = (value_data[0] << 8) | value_data[1];
                     break;
+                case id_dilemma_auto_snipe_enable:
+                    // Boolean validation: 0 or 1
+                    if (value_data[0] < 2) {
+                        g_via_dilemma_config.auto_snipe_enabled = value_data[0];
+                    }
+                    break;
+                case id_dilemma_auto_snipe_layer:
+                    // Layer validation: 0-127 (7-bit field)
+                    if (value_data[0] < 128) {
+                        g_via_dilemma_config.auto_snipe_layer = value_data[0];
+                    }
+                    break;
                 // Add more setters for each value_id
                 default:
                     *command_id = id_unhandled; // Unknown value ID
