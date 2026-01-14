@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-14)
 
 **Core value:** VIA customization interface - If this fails, nothing else matters. Every feature (gestures, scroll divisors, DPI controls) must be configurable through VIA without requiring firmware rebuilds.
-**Current focus:** Phase 3 — Basic Gesture Enablement
+**Current focus:** Phase 4 — Advanced Gesture Support
 
 ## Current Position
 
-Phase: 3 of 12 (Basic Gesture Enablement)
-Plan: 4 of 4 in current phase
-Status: Plan 03-04 complete - PHASE 3 COMPLETE
-Last activity: 2026-01-14 — Completed Plan 03-04 (Gesture Filtering Implementation)
+Phase: 4 of 12 (Advanced Gesture Support)
+Plan: 1 of 6 in current phase
+Status: Plan 04-01 complete - DISCOVERY complete, ready for implementation
+Last activity: 2026-01-14 — Completed Plan 04-01 (Advanced Gesture Discovery)
 
-Progress: ██████████░░ 72%
+Progress: ██████████░░ 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 15 min
-- Total execution time: 2.5 hours
+- Total execution time: 2.75 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: ██████████░░ 72%
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
+| 4. Advanced Gesture Support | 1 | 6 | 15 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (10 min), 03-01 (15 min), 03-02 (15 min), 03-03 (15 min), 03-04 (15 min)
+- Last 5 plans: 03-02 (15 min), 03-03 (15 min), 03-04 (15 min), 04-01 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -64,6 +65,10 @@ Recent decisions affecting current work:
 | 3 | Intercept digitizer_update_mouse_report() state machine for filtering | Clean integration point, minimal code changes, check flags before state transitions |
 | 3 | Static gesture state structure tracks gesture events for VIA filtering | Follows Phase 2 pattern (g_current_scroll_x/y_divisor), enables centralized state management |
 | 3 | Public API accessors for gesture state (dilemma_get_*) | Follows existing pattern (dilemma_get_pointer_sniping_enabled), enables external querying |
+| 4 | Option C EEPROM layout: 3-finger VIA-configurable, 4-finger hardcoded defaults | Balances space vs flexibility, fits 32-byte limit, prioritizes most common use case |
+| 4 | Squared distance comparison for zoom detection (no sqrt) | Avoids floating-point, uses integer math only, reduces complexity and improves performance |
+| 4 | Opt-in pinch-to-zoom (disabled by default) | Requires threshold tuning, prevents breaking existing configs, optional feature |
+| 4 | Version bump to 1 for EEPROM breaking change | Removes swipe_keycode field, adds directional 3-finger fields, enables migration strategy |
 
 ### Deferred Issues
 
@@ -80,8 +85,34 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 03-04 (Gesture Filtering Implementation) - Phase 3 Complete
+Stopped at: Completed Plan 04-01 (Advanced Gesture Discovery) - Ready for implementation
 Resume file: None
+
+## Plan 04-01 Summary
+
+**Duration:** 15 minutes (4 tasks, 4 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Documented existing swipe gesture implementation (digitizer_mouse_fallback.c analysis)
+2. ✅ Identified technical requirements for 3 vs 4 finger distinction (firmware + EEPROM)
+3. ✅ Documented pinch-to-zoom detection algorithm (gesture pattern, distance calculation, state machine)
+4. ✅ Created implementation strategy section (5 remaining plans, dependencies, risks)
+
+**Key Achievements:**
+- Comprehensive technical foundation for Phase 4 advanced gestures
+- Designed 3/4-finger swipe distinction (swipe_finger_count tracking, conditional keycodes)
+- Specified pinch-to-zoom detection (squared distance comparison, threshold-based triggering)
+- Created complete Phase 4 roadmap (5 plans: 04-02 through 04-06)
+- Analyzed EEPROM constraints and proposed Option C layout (3-finger VIA-configurable, 4-finger hardcoded)
+- Risk assessment with mitigations (overall LOW risk)
+- Identified parallelization opportunities (04-02 can run with 04-03)
+
+**Files Modified:**
+- .planning/phases/04-advanced-gesture-support/04-01-DISCOVERY.md (created, 1,435+ lines)
+- .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md (created)
+
+**Summary:** .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md
 
 ## Plan 03-04 Summary
 
