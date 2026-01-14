@@ -272,13 +272,17 @@ static void update_gesture_state(void) {
     // From 03-01 DISCOVERY.md:
     // - MaxTouch has NO GESTURE_EVENTS registers like Azoteq IQS5xx
     // - Gesture detection is firmware-based in digitizer_mouse_fallback.c
-    // - State machine tracks: None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Finished
+    // - State machine tracks: None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Zoom, Finished
     // - Plan 03-03 will integrate VIA config filtering into that state machine
     //
     // Future implementation (Plan 03-03):
     // - Access digitizer state machine to get current gesture state
     // - Update g_gesture_state fields based on active gesture
     // - This will be used by VIA config to enable/disable specific gestures
+    //
+    // Update zoom gesture state (if firmware implements it)
+    // Note: This is a placeholder - actual zoom detection happens in digitizer_mouse_fallback.c
+    // Future: Read firmware zoom state and update g_gesture_state.zoom
 }
 
 /**
