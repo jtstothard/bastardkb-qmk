@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-14)
 
 **Core value:** VIA customization interface - If this fails, nothing else matters. Every feature (gestures, scroll divisors, DPI controls) must be configurable through VIA without requiring firmware rebuilds.
-**Current focus:** Phase 2 — VIA Configuration Integration
+**Current focus:** Phase 3 — Basic Gesture Enablement
 
 ## Current Position
 
-Phase: 2 of 12 (VIA Configuration Integration)
-Plan: 3 of 3 in current phase
-Status: Phase 2 complete
-Last activity: 2026-01-14 — Completed Plan 02-03 (VIA Config Application Integration)
+Phase: 3 of 12 (Basic Gesture Enablement)
+Plan: 1 of 4 in current phase
+Status: Plan 03-01 complete
+Last activity: 2026-01-14 — Completed Plan 03-01 (Gesture Event Flow Discovery)
 
-Progress: ██████████░░ 50%
+Progress: ██████████░░ 58%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 15 min
-- Total execution time: 1.5 hours
+- Total execution time: 1.75 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: ██████████░░ 50%
 |-------|-------|-------|----------|
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
+| 3. Basic Gesture Enablement | 1 | 4 | 15 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (15 min), 01-03 (15 min), 02-01 (10 min), 02-02 (12 min), 02-03 (10 min)
+- Last 5 plans: 01-03 (15 min), 02-01 (10 min), 02-02 (12 min), 02-03 (10 min), 03-01 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -57,6 +58,10 @@ Recent decisions affecting current work:
 | 2 | Validate VIA input at set handlers, not get handlers | Fail-fast on invalid input prevents config corruption |
 | 2 | Apply VIA config immediately on save and mode changes | No reboot required, responsive UX |
 | 2 | Keep apply_via_dilemma_config() calling update_scroll_divisors() | Cleaner than separate calls, ensures consistency |
+| 3 | Firmware-based gesture filtering required (MaxTouch has no hardware gesture registers) | MaxTouch MXT336U lacks GESTURE_EVENTS like Azoteq IQS5xx, must filter at firmware level |
+| 3 | Use VIA config flags to enable/disable gestures at state machine level | Consistent with existing VIA pattern, firmware controls behavior not hardware |
+| 3 | Default all gestures ENABLED for backward compatibility | Prevent breaking existing user configs, opt-out via VIA |
+| 3 | Intercept digitizer_update_mouse_report() state machine for filtering | Clean integration point, minimal code changes, check flags before state transitions |
 
 ### Deferred Issues
 
@@ -73,7 +78,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 02-03 (VIA Config Application Integration)
+Stopped at: Completed Plan 03-01 (Gesture Event Flow Discovery)
 Resume file: None
 
 ## Phase 2 Progress Summary
@@ -117,6 +122,47 @@ Resume file: None
 
 **Files Modified in Phase 2:**
 - `keyboards/bastardkb/dilemma/dilemma.c` (+118 lines, 5 functions)
+
+## Phase 3 Progress Summary
+
+**Phase 3: Basic Gesture Enablement** 🔄 IN PROGRESS (1/4 complete)
+
+**Completed Plans:**
+1. ✅ 03-01: Gesture Event Flow Discovery (15 min)
+   - Researched MaxTouch MXT336U gesture capabilities
+   - DISCOVERY: MaxTouch has NO hardware gesture registers (unlike Azoteq IQS5xx)
+   - Documented firmware-based gesture state machine in digitizer_mouse_fallback.c
+   - Analyzed gesture detection: Tap, Swipe, Scroll, Drag
+   - Documented VIA integration strategy: Filter at state machine level
+   - Summary: `.planning/phases/03-basic-gesture-enablement/03-01-SUMMARY.md`
+   - Discovery: `.planning/phases/03-basic-gesture-enablement/03-01-DISCOVERY.md`
+
+**Key Achievements in Plan 03-01:**
+- ✅ Complete MaxTouch vs Azoteq IQS5xx gesture capability comparison
+- ✅ Event flow documented: Hardware → digitizer.c → firmware state machine
+- ✅ State machine architecture documented (None, Down, MoveScroll, Tapped, Swipe, Drag, Finished)
+- ✅ VIA integration strategy defined (use reserved bytes for gesture flags)
+- ✅ Risk assessment with mitigation strategies
+- ✅ Implementation roadmap for Plans 02-04
+
+**Upcoming Plans:**
+2. 03-02: Add VIA Gesture Flags
+   - Extend via_dilemma_config_t with gesture enable/disable flags
+   - Add VIA value IDs for gesture settings
+   - Implement get/set handlers
+
+3. 03-03: Implement Gesture Filtering
+   - Modify digitizer_update_mouse_report() state machine
+   - Add gesture config checks before gesture detection
+   - Test all gesture types with enable/disable
+
+4. 03-04: Add Gesture Sensitivity (Optional)
+   - Add sensitivity fields to VIA config
+   - Map VIA values to gesture thresholds
+   - Implement dynamic threshold adjustment
+
+**Files Modified in Phase 3:**
+- None (research phase only)
 
 ## Phase 1 Completion Summary
 
