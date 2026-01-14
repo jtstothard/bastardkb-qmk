@@ -291,29 +291,63 @@ static void update_gesture_state(void) {
  * Call this after update_gesture_state() to apply user preferences.
  */
 static void filter_gestures_by_via_config(void) {
+#ifdef CONSOLE_ENABLE
+    bool filtered_tap = false;
+    bool filtered_two_finger_tap = false;
+    bool filtered_scroll = false;
+    bool filtered_hold = false;
+#endif
+
     // Clear gestures that are disabled in VIA config
 
     if (!g_via_dilemma_config.tap_to_click_enabled) {
-        g_gesture_state.single_tap = false;
+        if (g_gesture_state.single_tap) {
+#ifdef CONSOLE_ENABLE
+            filtered_tap = true;
+#endif
+            g_gesture_state.single_tap = false;
+        }
     }
 
     if (!g_via_dilemma_config.two_finger_tap_enabled) {
-        g_gesture_state.two_finger_tap = false;
+        if (g_gesture_state.two_finger_tap) {
+#ifdef CONSOLE_ENABLE
+            filtered_two_finger_tap = true;
+#endif
+            g_gesture_state.two_finger_tap = false;
+        }
     }
 
     if (!g_via_dilemma_config.two_finger_scroll_enabled) {
-        g_gesture_state.scroll = false;
+        if (g_gesture_state.scroll) {
+#ifdef CONSOLE_ENABLE
+            filtered_scroll = true;
+#endif
+            g_gesture_state.scroll = false;
+        }
         // Note: Existing two-finger scroll logic in dilemma.c also
         // needs to check this flag for consistency
     }
 
     if (!g_via_dilemma_config.press_and_hold_enabled) {
-        g_gesture_state.press_and_hold = false;
+        if (g_gesture_state.press_and_hold) {
+#ifdef CONSOLE_ENABLE
+            filtered_hold = true;
+#endif
+            g_gesture_state.press_and_hold = false;
+        }
     }
 
     // Swipe gestures and zoom are Phase 4 (advanced gestures)
     // Their enable fields exist in EEPROM but aren't configurable yet
     // Leave them as-is for now (effectively always enabled)
+
+#ifdef CONSOLE_ENABLE
+    if (filtered_tap || filtered_two_finger_tap || filtered_scroll || filtered_hold) {
+        dprintf("(dilemma) gestures filtered: tap=%u two_finger_tap=%u scroll=%u hold=%u\n",
+                filtered_tap, filtered_two_finger_tap, filtered_scroll, filtered_hold);
+    }
+#endif
 }
 
 void pointing_device_init_kb(void) {
