@@ -70,6 +70,11 @@ typedef union {
 
 static dilemma_config_t g_dilemma_config = {0};
 
+// Global scroll divisor tracking variables
+// These track the current scroll divisors based on mode (drag-scroll vs two-finger)
+static uint16_t g_current_scroll_x_divisor = 8;  // Default matching VIA config
+static uint16_t g_current_scroll_y_divisor = 8;  // Default matching VIA config
+
 /**
  * \brief Set the value of `config` from EEPROM.
  *
