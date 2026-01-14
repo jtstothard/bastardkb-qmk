@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 3 of 12 (Basic Gesture Enablement)
-Plan: 1 of 4 in current phase
-Status: Plan 03-01 complete
-Last activity: 2026-01-14 — Completed Plan 03-01 (Gesture Event Flow Discovery)
+Plan: 2 of 4 in current phase
+Status: Plan 03-02 complete
+Last activity: 2026-01-14 — Completed Plan 03-02 (Gesture Event Tracking)
 
-Progress: ██████████░░ 58%
+Progress: ██████████░░ 62%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 15 min
-- Total execution time: 1.75 hours
+- Total execution time: 2 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: ██████████░░ 58%
 |-------|-------|-------|----------|
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
-| 3. Basic Gesture Enablement | 1 | 4 | 15 min |
+| 3. Basic Gesture Enablement | 2 | 4 | 15 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (15 min), 02-01 (10 min), 02-02 (12 min), 02-03 (10 min), 03-01 (15 min)
+- Last 5 plans: 02-01 (10 min), 02-02 (12 min), 02-03 (10 min), 03-01 (15 min), 03-02 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -62,6 +62,8 @@ Recent decisions affecting current work:
 | 3 | Use VIA config flags to enable/disable gestures at state machine level | Consistent with existing VIA pattern, firmware controls behavior not hardware |
 | 3 | Default all gestures ENABLED for backward compatibility | Prevent breaking existing user configs, opt-out via VIA |
 | 3 | Intercept digitizer_update_mouse_report() state machine for filtering | Clean integration point, minimal code changes, check flags before state transitions |
+| 3 | Static gesture state structure tracks gesture events for VIA filtering | Follows Phase 2 pattern (g_current_scroll_x/y_divisor), enables centralized state management |
+| 3 | Public API accessors for gesture state (dilemma_get_*) | Follows existing pattern (dilemma_get_pointer_sniping_enabled), enables external querying |
 
 ### Deferred Issues
 
@@ -78,8 +80,32 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 03-01 (Gesture Event Flow Discovery)
+Stopped at: Completed Plan 03-02 (Gesture Event Tracking)
 Resume file: None
+
+## Plan 03-02 Summary
+
+**Duration:** 15 minutes (4 tasks, 4 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added gesture state tracking structure (g_gesture_state) to dilemma.c
+2. ✅ Created update_gesture_state() function with comprehensive TODO
+3. ✅ Integrated gesture state updates into pointing_device_task_dilemma()
+4. ✅ Added public API getter functions for all gesture types
+
+**Key Achievements:**
+- Gesture state infrastructure established
+- Public API provides 7 getter functions (single_tap, two_finger_tap, swipes, press_and_hold)
+- Integration points ready for Plan 03-03 VIA config filtering
+- Comprehensive TODO documents MaxTouch firmware-based detection
+- Follows Phase 2 patterns (static globals, accessor functions)
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.c (+81 lines)
+- keyboards/bastardkb/dilemma/dilemma.h (+8 lines)
+
+**Summary:** .planning/phases/03-basic-gesture-enablement/03-02-SUMMARY.md
 
 ## Phase 2 Progress Summary
 
@@ -125,7 +151,7 @@ Resume file: None
 
 ## Phase 3 Progress Summary
 
-**Phase 3: Basic Gesture Enablement** 🔄 IN PROGRESS (1/4 complete)
+**Phase 3: Basic Gesture Enablement** 🔄 IN PROGRESS (2/4 complete)
 
 **Completed Plans:**
 1. ✅ 03-01: Gesture Event Flow Discovery (15 min)
@@ -137,24 +163,30 @@ Resume file: None
    - Summary: `.planning/phases/03-basic-gesture-enablement/03-01-SUMMARY.md`
    - Discovery: `.planning/phases/03-basic-gesture-enablement/03-01-DISCOVERY.md`
 
-**Key Achievements in Plan 03-01:**
-- ✅ Complete MaxTouch vs Azoteq IQS5xx gesture capability comparison
-- ✅ Event flow documented: Hardware → digitizer.c → firmware state machine
-- ✅ State machine architecture documented (None, Down, MoveScroll, Tapped, Swipe, Drag, Finished)
-- ✅ VIA integration strategy defined (use reserved bytes for gesture flags)
-- ✅ Risk assessment with mitigation strategies
-- ✅ Implementation roadmap for Plans 02-04
+2. ✅ 03-02: Gesture Event Tracking (15 min)
+   - Added gesture state tracking structure (g_gesture_state) to dilemma.c
+   - Created update_gesture_state() function with TODO placeholder
+   - Integrated gesture state updates into pointing_device_task_dilemma()
+   - Added public API getter functions for all gesture types
+   - Established infrastructure for VIA config filtering in Plan 03-03
+   - Summary: `.planning/phases/03-basic-gesture-enablement/03-02-SUMMARY.md`
+
+**Key Achievements in Plan 03-02:**
+- ✅ Gesture state structure tracks all gesture types from Azoteq spec
+- ✅ Update function integrated into main pointing device loop
+- ✅ Public API provides accessors for single_tap, two_finger_tap, swipe (4 directions), press_and_hold
+- ✅ Comprehensive TODO documents MaxTouch firmware-based detection
+- ✅ Clear integration points for Plan 03-03 VIA config filtering
+- ✅ Follows Phase 2 patterns (static globals, accessor functions)
 
 **Upcoming Plans:**
-2. 03-02: Add VIA Gesture Flags
-   - Extend via_dilemma_config_t with gesture enable/disable flags
-   - Add VIA value IDs for gesture settings
-   - Implement get/set handlers
-
 3. 03-03: Implement Gesture Filtering
+   - Add VIA gesture enable flags to via_dilemma_config_t (bytes 6-7 reserved)
+   - Add VIA value IDs for gesture settings
+   - Implement get/set handlers in via_custom_value_command_kb()
    - Modify digitizer_update_mouse_report() state machine
    - Add gesture config checks before gesture detection
-   - Test all gesture types with enable/disable
+   - Complete update_gesture_state() TODO with actual integration
 
 4. 03-04: Add Gesture Sensitivity (Optional)
    - Add sensitivity fields to VIA config
@@ -162,7 +194,8 @@ Resume file: None
    - Implement dynamic threshold adjustment
 
 **Files Modified in Phase 3:**
-- None (research phase only)
+- `keyboards/bastardkb/dilemma/dilemma.c` (+81 lines, gesture state structure + function + accessors)
+- `keyboards/bastardkb/dilemma/dilemma.h` (+8 lines, accessor declarations)
 
 ## Phase 1 Completion Summary
 
