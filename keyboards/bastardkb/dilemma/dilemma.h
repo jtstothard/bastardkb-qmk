@@ -52,6 +52,11 @@ enum via_dilemma_value_id {
     id_dilemma_drag_scroll_y = 5,
     id_dilemma_two_finger_x = 6,
     id_dilemma_two_finger_y = 7,
+    // Basic gesture enables (Phase 3)
+    id_dilemma_tap_to_click_enable = 8,
+    id_dilemma_two_finger_tap_enable = 9,
+    id_dilemma_two_finger_scroll_enable = 10,
+    id_dilemma_press_and_hold_enable = 11,
     // Add more IDs as needed for phases 4-12
 };
 
