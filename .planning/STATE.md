@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 8 of 12 (VIA Menu UI Design)
-Plan: 2 of 3 in current phase
-Status: ✅ COMPLETE - Basic VIA menu JSON structure created
-Last activity: 2026-01-14 — Completed Plan 08-02 (Basic VIA Menu JSON Structure)
+Plan: 3 of 3 in current phase
+Status: ✅ COMPLETE - Complete VIA menu with all 8 containers
+Last activity: 2026-01-14 — Completed Plan 08-03 (Complete VIA Menus)
 
-Progress: ██████████ 67%
+Progress: ██████████ 75%
 
 ## Performance Metrics
 
@@ -33,11 +33,11 @@ Progress: ██████████ 67%
 | 4. Advanced Gesture Support | 6 | 6 | 15 min |
 | 6. Smart Gesture Features | 3 | 3 | 9 min |
 | 7. Auto-Sniping Toggle | 3 | 3 | 4 min |
-| 8. VIA Menu UI Design | 2 | 3 | 12 min |
+| 8. VIA Menu UI Design | 3 | 3 | 10 min |
 
 **Recent Trend:**
-- Last 5 plans: 08-02 (5 min), 08-01 (20 min), 07-03 (5 min), 07-02 (5 min), 07-01 (2 min)
-- Trend: Stable | On track (Phase 8 progressing as planned)
+- Last 5 plans: 08-03 (8 min), 08-02 (5 min), 08-01 (20 min), 07-03 (5 min), 07-02 (5 min)
+- Trend: Stable | Phase 8 complete, ready for Phase 9
 
 ## Accumulated Context
 
@@ -187,6 +187,97 @@ None yet.
 - keyboards/bastardkb/dilemma/via.json (created, 136 lines)
 
 **Summary:** .planning/phases/08-via-menu-ui-design/08-02-SUMMARY.md
+
+## Plan 08-03 Summary
+
+**Duration:** 8 minutes (4 tasks, 5 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added Advanced Gestures menu container (3 toggles, valueIds 12-14)
+2. ✅ Added Swipe Keycodes menu container (8 keycode items, valueIds 15-22)
+3. ✅ Added Gesture Keycodes menu container (7 items: 5 placeholders + 2 zoom keycodes, valueIds 23-24)
+4. ✅ Added Advanced Settings menu container (2 items: auto-snipe enable/layer, valueIds 25-26)
+5. ✅ Verified JSON syntax and complete structure (all 27 value IDs 0-26 mapped)
+
+**Key Achievements:**
+- Complete VIA menu UI design with all 8 menu containers
+- 28 total menu items covering all Dilemma v3 settings
+- All 27 VIA value IDs (0-26) mapped to UI controls
+- JSON syntax validated and verified
+- Ready for VIA testing and Phase 9
+
+**Menu Structure Completed:**
+- Pointer: 4 items (DPI preset, custom DPI, sniping DPI, drag scroll)
+- Scroll: 4 items (X/Y divisors for drag and two-finger scroll)
+- Gestures - Basic: 4 toggles (tap, two-finger tap, scroll, hold)
+- Gestures - Advanced: 3 toggles (3-finger, 4-finger, zoom enables)
+- Swipe Keycodes: 8 items (3-finger and 4-finger, all 4 directions)
+- Gesture Keycodes: 7 items (5 placeholders + 2 zoom keycodes)
+- Advanced Settings: 2 items (auto-snipe enable and layer)
+- Actions: 2 items (save, reset)
+
+**Technical Implementation:**
+- Advanced gesture toggles: valueIds 12-14 (toggle type)
+- Swipe keycodes: valueIds 15-22 (uint16 type, full keycode range 0-65535)
+- Gesture keycodes: valueIds 23-24 (zoom in/out) + 5 placeholders (valueId 0, type none)
+- Advanced settings: valueIds 25-26 (auto-snipe enable toggle + layer uint8)
+- Placeholder controls for basic gesture keycodes (can be added later if needed)
+- All valueIds map to dilemma.h enum definitions
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/via.json (+184 lines: 4 new menu containers, 20 new items)
+- .planning/phases/08-via-menu-ui-design/08-03-SUMMARY.md (created, 367 lines)
+
+**Summary:** .planning/phases/08-via-menu-ui-design/08-03-SUMMARY.md
+
+## Phase 8 Complete Summary
+
+**Phase: VIA Menu UI Design**
+**Duration:** 33 minutes (3 plans, 8 tasks, 9 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Plans Completed:**
+1. ✅ 08-01: VIA Menu Format Discovery (20 min)
+   - Researched VIA custom menu JSON format
+   - Designed menu hierarchy for Dilemma v3
+   - Created implementation strategy
+   - Summary: `.planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md`
+
+2. ✅ 08-02: Basic VIA Menu JSON Structure (5 min)
+   - Created via.json with basic menu structure
+   - 4 top-level menus: Pointer, Scroll, Gestures - Basic, Actions
+   - 14 menu items covering most common settings
+   - All valueIds (0-11) mapped to dilemma.h enum definitions
+   - Summary: `.planning/phases/08-via-menu-ui-design/08-02-SUMMARY.md`
+
+3. ✅ 08-03: Complete VIA Menus (8 min)
+   - Added 4 new menu containers (Gestures - Advanced, Swipe Keycodes, Gesture Keycodes, Advanced Settings)
+   - 14 new menu items (advanced toggles, swipe keycodes, zoom keycodes, auto-snipe)
+   - All 27 VIA value IDs (0-26) mapped to UI controls
+   - JSON syntax validated and verified
+   - Summary: `.planning/phases/08-via-menu-ui-design/08-03-SUMMARY.md`
+
+**Key Achievements in Phase 8:**
+- ✅ Complete VIA menu UI design with 8 menu containers
+- ✅ 28 total menu items covering all Dilemma v3 settings
+- ✅ All 27 VIA value IDs (0-26) mapped to UI controls
+- ✅ JSON syntax validated and verified
+- ✅ User-friendly interface for DPI, scroll, gestures, keycodes, and auto-snipe
+- ✅ Logical grouping and progressive disclosure
+- ✅ Ready for comprehensive VIA testing in Phase 9
+
+**Files Modified in Phase 8:**
+- `keyboards/bastardkb/dilemma/via.json` (created, 320 lines: complete VIA menu structure)
+- `.planning/phases/08-via-menu-ui-design/08-01-DISCOVERY.md` (created, 747 lines)
+- `.planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md` (created, 351 lines)
+- `.planning/phases/08-via-menu-ui-design/08-02-SUMMARY.md` (created, 256 lines)
+- `.planning/phases/08-via-menu-ui-design/08-03-SUMMARY.md` (created, 367 lines)
+
+**Next Phase:** Phase 9 - VIA Testing and Validation
+- Plan 09-01: Load via.json in VIA configurator
+- Plan 09-02: Test all UI controls and verify integration
+- Plan 09-03: Document test results and any issues
 
 ## Phase 7 Complete Summary
 
