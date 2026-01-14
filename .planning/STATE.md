@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-14)
 
 **Core value:** VIA customization interface - If this fails, nothing else matters. Every feature (gestures, scroll divisors, DPI controls) must be configurable through VIA without requiring firmware rebuilds.
-**Current focus:** Phase 7 — Auto-Sniping Toggle
+**Current focus:** Phase 8 — VIA Menu UI Design
 
 ## Current Position
 
-Phase: 7 of 12 (Auto-Sniping Toggle)
-Plan: 3 of 3 in current phase
-Status: ✅ COMPLETE - Auto-sniping toggle fully implemented
-Last activity: 2026-01-14 — Completed Plan 07-03 (VIA Command Handlers)
+Phase: 8 of 12 (VIA Menu UI Design)
+Plan: 1 of 3 in current phase
+Status: ✅ COMPLETE - VIA menu format research and menu design complete
+Last activity: 2026-01-14 — Completed Plan 08-01 (VIA Menu UI Design Discovery)
 
-Progress: ██████████ 100%
+Progress: ██████░░░░ 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
-- Average duration: 14.3 min
-- Total execution time: 5.0 hours
+- Total plans completed: 22
+- Average duration: 14.1 min
+- Total execution time: 5.2 hours
 
 **By Phase:**
 
@@ -32,10 +32,12 @@ Progress: ██████████ 100%
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
 | 4. Advanced Gesture Support | 6 | 6 | 15 min |
 | 6. Smart Gesture Features | 3 | 3 | 9 min |
+| 7. Auto-Sniping Toggle | 3 | 3 | 4 min |
+| 8. VIA Menu UI Design | 1 | 3 | 20 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (8 min), 06-01 (10 min), 04-05 (15 min), 04-04 (15 min), 04-03 (15 min)
-- Trend: Stable | Accelerating (Phase 6 ahead of schedule)
+- Last 5 plans: 08-01 (20 min), 07-03 (5 min), 07-02 (5 min), 07-01 (2 min), 06-02 (8 min)
+- Trend: Stable | On track (Phase 8 progressing as planned)
 
 ## Accumulated Context
 
@@ -115,6 +117,44 @@ None yet.
 - keyboards/bastardkb/dilemma/dilemma.c (+22 lines: set/get handlers + defaults)
 
 **Summary:** .planning/phases/07-auto-sniping-toggle/07-03-SUMMARY.md
+
+## Plan 08-01 Summary
+
+**Duration:** 20 minutes (3 tasks, 2 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Researched VIA custom menu JSON format (15 min)
+2. ✅ Designed menu hierarchy for Dilemma v3 (3 min)
+3. ✅ Created implementation strategy (2 min)
+
+**Key Achievements:**
+- Comprehensive VIA menu format documentation (747 lines in DISCOVERY.md)
+- 5 top-level menus designed (Pointer, Scrolling, Basic Gestures, Advanced Gestures, Advanced)
+- All 27 VIA value IDs (0-26) mapped to UI controls
+- 30+ settings organized into logical groups
+- Conditional display strategy with showIf for keycode controls
+- Clear implementation roadmap for Plans 08-02 and 08-03
+
+**Menu Structure:**
+- Pointer: DPI preset, custom DPI, drag scroll X/Y (4 items, IDs 2-5)
+- Scrolling: Two-finger scroll X/Y (2 items, IDs 6-7)
+- Basic Gestures: Tap enables (4 items, IDs 8-11)
+- Advanced Gestures: 3/4-finger swipes, zoom with keycodes (13 items, IDs 12-24)
+- Advanced: Auto-snipe + Save/Reset (3 items, IDs 1, 25-26)
+
+**Technical Decisions:**
+- 5 top-level menus for logical grouping and progressive disclosure
+- Conditional display: Keycode controls only show when gesture enabled
+- User-friendly labels (clear names vs technical terms)
+- Action buttons in Advanced menu (Save/Reset at bottom)
+- Custom channel_id = 0 to avoid conflicts with built-in channels
+
+**Files Modified:**
+- .planning/phases/08-via-menu-ui-design/08-01-DISCOVERY.md (created, 747 lines)
+- .planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md (created, 351 lines)
+
+**Summary:** .planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md
 
 ## Phase 7 Complete Summary
 
