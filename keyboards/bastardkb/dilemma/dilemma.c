@@ -390,6 +390,10 @@ static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
     // Filter gestures based on VIA config
     filter_gestures_by_via_config();
 
+    // Note: Force click is handled at firmware level in digitizer_mouse_fallback.c
+    // The state machine checks press_and_hold_enabled and triggers press_and_hold_keycode
+    // No additional state tracking needed here
+
     if (g_dilemma_config.is_dragscroll_enabled) {
         // Drag-scroll mode: convert trackball movement to scroll
         // Apply VIA drag-scroll divisor to scale movement before accumulation
