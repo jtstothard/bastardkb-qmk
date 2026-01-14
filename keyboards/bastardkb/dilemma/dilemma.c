@@ -75,6 +75,19 @@ static dilemma_config_t g_dilemma_config = {0};
 static uint16_t g_current_scroll_x_divisor = 8;  // Default matching VIA config
 static uint16_t g_current_scroll_y_divisor = 8;  // Default matching VIA config
 
+// Track current gesture events from Azoteq hardware
+static struct {
+    bool single_tap;           // GESTURE_EVENTS_0 bit
+    bool two_finger_tap;       // GESTURE_EVENTS_1 bit
+    bool swipe_x_plus;         // Swipe right
+    bool swipe_x_minus;        // Swipe left
+    bool swipe_y_plus;         // Swipe up
+    bool swipe_y_minus;        // Swipe down
+    bool press_and_hold;       // GESTURE_EVENTS_0 bit
+    bool scroll;               // GESTURE_EVENTS_1 bit (already tracked via two-finger scroll)
+    bool zoom;                 // GESTURE_EVENTS_1 bit
+} g_gesture_state = {0};
+
 /**
  * \brief Set the value of `config` from EEPROM.
  *
