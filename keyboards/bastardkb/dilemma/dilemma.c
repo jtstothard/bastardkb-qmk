@@ -664,6 +664,15 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                 case id_dilemma_press_and_hold_enable:
                     g_via_dilemma_config.press_and_hold_enabled = value_data[0];
                     break;
+                case id_dilemma_three_finger_swipe_enable:
+                    g_via_dilemma_config.three_finger_swipe_enabled = value_data[0];
+                    break;
+                case id_dilemma_four_finger_swipe_enable:
+                    g_via_dilemma_config.four_finger_swipe_enabled = value_data[0];
+                    break;
+                case id_dilemma_pinch_to_zoom_enable:
+                    g_via_dilemma_config.pinch_to_zoom_enabled = value_data[0];
+                    break;
                 // Add more setters for each value_id
                 default:
                     *command_id = id_unhandled; // Unknown value ID
