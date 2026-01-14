@@ -71,6 +71,9 @@ enum via_dilemma_value_id {
     id_dilemma_four_finger_swipe_right_keycode = 20,
     id_dilemma_four_finger_swipe_up_keycode = 21,
     id_dilemma_four_finger_swipe_down_keycode = 22,
+    // Pinch-to-zoom keycodes (Bytes 34-37, 16-bit each)
+    id_dilemma_zoom_in_keycode = 23,
+    id_dilemma_zoom_out_keycode = 24,
     // Add more IDs as needed for phases 5-12
 };
 
