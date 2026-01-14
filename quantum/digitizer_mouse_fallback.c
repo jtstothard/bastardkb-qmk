@@ -45,6 +45,22 @@ typedef struct {
 #        define DIGITIZER_MOUSE_SWIPE_THRESHOLD 300
 #    endif
 
+#    ifndef DIGITIZER_MOUSE_ZOOM_TIMEOUT
+#        define DIGITIZER_MOUSE_ZOOM_TIMEOUT 300  // Max duration for zoom gesture (ms)
+#    endif
+
+#    ifndef DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD
+#        define DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD 10000  // Squared distance change for zoom (100px²)
+#    endif
+
+#    ifndef DIGITIZER_ZOOM_IN_KC
+#        define DIGITIZER_ZOOM_IN_KC KC_EQUAL  // Zoom in (plus key)
+#    endif
+
+#    ifndef DIGITIZER_ZOOM_OUT_KC
+#        define DIGITIZER_ZOOM_OUT_KC KC_MINUS  // Zoom out (minus key)
+#    endif
+
 #    ifndef DIGITIZER_SWIPE_LEFT_KC
 #        define DIGITIZER_SWIPE_LEFT_KC QK_MOUSE_BUTTON_3
 #    endif
