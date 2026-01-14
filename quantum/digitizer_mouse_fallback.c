@@ -447,10 +447,16 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                     if (g_via_dilemma_config.pinch_to_zoom_enabled) {
                         if (distance_delta > 0) {
                             // Fingers moved apart = zoom in
-                            tap_code(DIGITIZER_ZOOM_IN_KC);
+                            uint16_t zoom_in_code = g_via_dilemma_config.zoom_in_keycode;
+                            if (zoom_in_code != 0) {
+                                tap_code(zoom_in_code);
+                            }
                         } else {
                             // Fingers moved together = zoom out
-                            tap_code(DIGITIZER_ZOOM_OUT_KC);
+                            uint16_t zoom_out_code = g_via_dilemma_config.zoom_out_keycode;
+                            if (zoom_out_code != 0) {
+                                tap_code(zoom_out_code);
+                            }
                         }
                     }
                     state = Finished;  // Exit after triggering zoom
