@@ -298,7 +298,15 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             const uint16_t distance_y = abs(contact_start_y - y);
             tap_contacts              = MAX(contacts, tap_contacts);
 
-            if (contacts == 0) {
+            // Check for force click (long press)
+            if (duration > DIGITIZER_FORCE_CLICK_TIMEOUT && g_via_dilemma_config.press_and_hold_enabled) {
+                // Force click detected - trigger press_and_hold keycode
+                uint16_t force_click_code = g_via_dilemma_config.press_and_hold_keycode;
+                if (force_click_code != 0) {
+                    tap_code(force_click_code);
+                }
+                state = Finished;  // Exit after force click
+            } else if (contacts == 0) {
                 state              = Tapped;
                 contact_start_time = timer_read32();
             } else if (contacts >= 3) {
