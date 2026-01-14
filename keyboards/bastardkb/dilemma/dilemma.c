@@ -338,9 +338,21 @@ static void filter_gestures_by_via_config(void) {
         }
     }
 
-    // Swipe gestures and zoom are Phase 4 (advanced gestures)
-    // Their enable fields exist in EEPROM but aren't configurable yet
-    // Leave them as-is for now (effectively always enabled)
+    // Advanced gesture filtering
+    if (!g_via_dilemma_config.three_finger_swipe_enabled) {
+        g_gesture_state.swipe_x_plus = false;      // Clear 3-finger swipes
+        g_gesture_state.swipe_x_minus = false;
+        g_gesture_state.swipe_y_plus = false;
+        g_gesture_state.swipe_y_minus = false;
+    }
+
+    // Note: 4-finger swipes use same gesture state fields as 3-finger
+    // The firmware distinguishes by swipe_finger_count, but VIA config
+    // checks are done at state machine level, not in this filter function
+
+    if (!g_via_dilemma_config.pinch_to_zoom_enabled) {
+        g_gesture_state.zoom = false;  // Clear zoom gesture
+    }
 
 #ifdef CONSOLE_ENABLE
     if (filtered_tap || filtered_two_finger_tap || filtered_scroll || filtered_hold) {
