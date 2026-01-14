@@ -139,6 +139,91 @@
       ]
     },
     {
+      "label": "Swipe Keycodes",
+      "content": [
+        {
+          "label": "Three-Finger Left",
+          "content": "uint16",
+          "valueId": 15,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Three-Finger Right",
+          "content": "uint16",
+          "valueId": 16,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Three-Finger Up",
+          "content": "uint16",
+          "valueId": 17,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Three-Finger Down",
+          "content": "uint16",
+          "valueId": 18,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Four-Finger Left",
+          "content": "uint16",
+          "valueId": 19,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Four-Finger Right",
+          "content": "uint16",
+          "valueId": 20,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Four-Finger Up",
+          "content": "uint16",
+          "valueId": 21,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Four-Finger Down",
+          "content": "uint16",
+          "valueId": 22,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        }
+      ]
+    },
+    {
       "label": "Actions",
       "content": [
         {
