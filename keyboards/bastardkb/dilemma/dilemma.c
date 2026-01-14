@@ -453,6 +453,10 @@ void eeconfig_init_kb(void) {
     g_via_dilemma_config.drag_scroll_y_divisor = 8;
     g_via_dilemma_config.two_finger_x_divisor = 8;
     g_via_dilemma_config.two_finger_y_divisor = 8;
+    g_via_dilemma_config.tap_to_click_enabled = 1;        // Enabled by default
+    g_via_dilemma_config.two_finger_tap_enabled = 0;     // Disabled by default
+    g_via_dilemma_config.two_finger_scroll_enabled = 1;  // Enabled by default (already working)
+    g_via_dilemma_config.press_and_hold_enabled = 0;     // Disabled by default
     g_via_dilemma_config.config_version = 1;
     write_via_dilemma_config();
 
