@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 4 of 12 (Advanced Gesture Support)
-Plan: 1 of 6 in current phase
-Status: Plan 04-01 complete - DISCOVERY complete, ready for implementation
-Last activity: 2026-01-14 — Completed Plan 04-01 (Advanced Gesture Discovery)
+Plan: 3 of 6 in current phase
+Status: Plan 04-03 complete - VIA value IDs for advanced gestures added
+Last activity: 2026-01-14 — Completed Plan 04-03 (VIA Value IDs for Advanced Gesture Support)
 
-Progress: ██████████░░ 78%
+Progress: ██████████░░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 13
 - Average duration: 15 min
-- Total execution time: 2.75 hours
+- Total execution time: 3.0 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: ██████████░░ 78%
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
-| 4. Advanced Gesture Support | 1 | 6 | 15 min (in progress) |
+| 4. Advanced Gesture Support | 3 | 6 | 15 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (15 min), 03-03 (15 min), 03-04 (15 min), 04-01 (15 min)
+- Last 5 plans: 03-04 (15 min), 04-01 (15 min), 04-02 (15 min), 04-03 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -85,7 +85,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 04-01 (Advanced Gesture Discovery) - Ready for implementation
+Stopped at: Completed Plan 04-03 (VIA Value IDs for Advanced Gesture Support)
 Resume file: None
 
 ## Plan 04-01 Summary
@@ -113,6 +113,57 @@ Resume file: None
 - .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md (created)
 
 **Summary:** .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md
+
+## Plan 04-03 Summary
+
+**Duration:** 15 minutes (4 tasks, 4 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added advanced gesture enable value IDs (12-14)
+2. ✅ Added 3-finger swipe keycode value IDs (15-18)
+3. ✅ Added 4-finger swipe keycode value IDs (19-22)
+4. ✅ Added pinch-to-zoom keycode value IDs (23-24)
+
+**Key Achievements:**
+- Complete VIA value ID interface established for advanced gestures
+- 13 new VIA value IDs added (12-24) following sequential numbering pattern
+- Advanced gesture enables: 3 IDs (12-14)
+- 3-finger swipe keycodes: 4 IDs (15-18)
+- 4-finger swipe keycodes: 4 IDs (19-22)
+- Pinch-to-zoom keycodes: 2 IDs (23-24)
+- Interface ready for Plan 04-04 command handlers
+- Comments document EEPROM layout implications (20 bytes needed for advanced gesture keycodes)
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.h (+18 lines, 13 new VIA value IDs)
+
+**Summary:** .planning/phases/04-advanced-gesture-support/04-03-SUMMARY.md
+
+## Plan 04-02 Summary
+
+**Duration:** 15 minutes (4 tasks, 4 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added advanced gesture enable fields to EEPROM struct (Byte 7)
+2. ✅ Added 3-finger swipe keycode fields (Bytes 18-25)
+3. ✅ Removed obsolete swipe_keycode field (Bytes 18-19)
+4. ✅ Added config version field and migration notes (Byte 31)
+
+**Key Achievements:**
+- Extended via_dilemma_config_t with advanced gesture fields
+- Removed obsolete swipe_keycode (2 bytes saved)
+- Byte 7: Advanced gesture enables (3 bit-fields)
+- Bytes 18-25: 3-finger swipe keycodes (4 × uint16_t = 8 bytes)
+- Total EEPROM usage: ~28 bytes (4 bytes remaining for expansion)
+- Config version field enables migration strategy (breaking change)
+- Documented 4-finger swipe and zoom keycodes as hardcoded defaults (space optimization)
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.h (+14 lines, extended EEPROM struct)
+
+**Summary:** .planning/phases/04-advanced-gesture-support/04-02-SUMMARY.md
 
 ## Plan 03-04 Summary
 
