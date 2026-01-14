@@ -213,6 +213,22 @@ static uint16_t zoom_finger2_x = 0;           // Second finger X position
 static uint16_t zoom_finger2_y = 0;           // Second finger Y position
 
 /**
+ * \brief Calculate squared distance between two points (avoids sqrt for performance).
+ *
+ * Uses squared distance instead of actual distance to avoid floating-point math.
+ * Compare against squared thresholds for zoom detection.
+ *
+ * @param x1, y1 First point coordinates
+ * @param x2, y2 Second point coordinates
+ * @return Squared distance between points
+ */
+static int32_t calculate_squared_distance(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2) {
+    const int32_t dx = (int32_t)x2 - (int32_t)x1;
+    const int32_t dy = (int32_t)y2 - (int32_t)y1;
+    return dx * dx + dy * dy;
+}
+
+/**
  * \brief Signals that a gesture is in progress so digitizer_update_mouse_report should be called,
  * even if no new digitizer data is available.
  * @return true if update_mouse_report should run.
