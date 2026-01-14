@@ -296,19 +296,35 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             } else if (digitizer_send_mouse_reports) {
                 if (distance_x > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe right
-                    tap_code(DIGITIZER_SWIPE_RIGHT_KC);
+                    if (swipe_finger_count == 3) {
+                        tap_code(DIGITIZER_SWIPE_RIGHT_KC);  // 3-finger swipe right
+                    } else if (swipe_finger_count == 4) {
+                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC);  // 4-finger swipe right
+                    }
                     state = Finished;
                 } else if (distance_x < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe left
-                    tap_code(DIGITIZER_SWIPE_LEFT_KC);
+                    if (swipe_finger_count == 3) {
+                        tap_code(DIGITIZER_SWIPE_LEFT_KC);  // 3-finger swipe left
+                    } else if (swipe_finger_count == 4) {
+                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC);  // 4-finger swipe left
+                    }
                     state = Finished;
                 } else if (distance_y > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe down
-                    tap_code(DIGITIZER_SWIPE_DOWN_KC);
+                    if (swipe_finger_count == 3) {
+                        tap_code(DIGITIZER_SWIPE_DOWN_KC);  // 3-finger swipe down
+                    } else if (swipe_finger_count == 4) {
+                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC);  // 4-finger swipe down
+                    }
                     state = Finished;
                 } else if (distance_y < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe up
-                    tap_code(DIGITIZER_SWIPE_UP_KC);
+                    if (swipe_finger_count == 3) {
+                        tap_code(DIGITIZER_SWIPE_UP_KC);  // 3-finger swipe up
+                    } else if (swipe_finger_count == 4) {
+                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_UP_KC);  // 4-finger swipe up
+                    }
                     state = Finished;
                 }
             }
