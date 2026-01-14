@@ -270,6 +270,9 @@ static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
     // Update scroll divisors based on current mode
     update_scroll_divisors();
 
+    // Update gesture state from digitizer
+    update_gesture_state();
+
     if (g_dilemma_config.is_dragscroll_enabled) {
         // Drag-scroll mode: convert trackball movement to scroll
         // Apply VIA drag-scroll divisor to scale movement before accumulation
