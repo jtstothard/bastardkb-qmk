@@ -196,7 +196,7 @@ static void digitizer_set_cpi(uint16_t cpi) {
 }
 
 // The gesture detection state machine will transition between these states.
-typedef enum { None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Finished } State;
+typedef enum { None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Zoom, Finished } State;
 
 static State state     = None;
 static int   tap_count = 0;
