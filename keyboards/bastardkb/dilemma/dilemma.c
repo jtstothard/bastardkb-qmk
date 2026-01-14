@@ -281,6 +281,41 @@ static void update_gesture_state(void) {
     // - This will be used by VIA config to enable/disable specific gestures
 }
 
+/**
+ * \brief Filter gesture events based on VIA config enables.
+ *
+ * Checks gesture state against VIA config enable flags and clears
+ * disabled gestures from the state. This prevents disabled gestures
+ * from being processed by the firmware.
+ *
+ * Call this after update_gesture_state() to apply user preferences.
+ */
+static void filter_gestures_by_via_config(void) {
+    // Clear gestures that are disabled in VIA config
+
+    if (!g_via_dilemma_config.tap_to_click_enabled) {
+        g_gesture_state.single_tap = false;
+    }
+
+    if (!g_via_dilemma_config.two_finger_tap_enabled) {
+        g_gesture_state.two_finger_tap = false;
+    }
+
+    if (!g_via_dilemma_config.two_finger_scroll_enabled) {
+        g_gesture_state.scroll = false;
+        // Note: Existing two-finger scroll logic in dilemma.c also
+        // needs to check this flag for consistency
+    }
+
+    if (!g_via_dilemma_config.press_and_hold_enabled) {
+        g_gesture_state.press_and_hold = false;
+    }
+
+    // Swipe gestures and zoom are Phase 4 (advanced gestures)
+    // Their enable fields exist in EEPROM but aren't configurable yet
+    // Leave them as-is for now (effectively always enabled)
+}
+
 void pointing_device_init_kb(void) {
     maybe_update_pointing_device_cpi(&g_dilemma_config);
     pointing_device_init_user();
