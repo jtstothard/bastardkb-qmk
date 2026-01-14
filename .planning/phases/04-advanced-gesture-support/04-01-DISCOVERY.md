@@ -1021,4 +1021,415 @@ bool dilemma_get_zoom(void);  // Already declared
 
 ---
 
-**Next Section:** Implementation Strategy for Phase 4
+## Phase 4 Implementation Strategy
+
+This section provides the complete implementation roadmap for Phase 4 (Advanced Gesture Support), breaking down the work into 5 executable plans with clear dependencies and deliverables.
+
+---
+
+### Plan 04-02: Extend Firmware for Finger Count Tracking
+
+**Objective:** Add 3-finger vs 4-finger swipe distinction to digitizer_mouse_fallback.c state machine.
+
+**Deliverables:**
+- Modified state machine with finger count tracking
+- Conditional keycode branching based on finger count
+- Backward-compatible with existing swipe behavior
+
+**Tasks:**
+
+1. **Add finger count tracking variable**
+   - File: `quantum/digitizer_mouse_fallback.c`
+   - Add `static int swipe_finger_count = 0;` near line 176
+   - Track exact finger count at Swipe state entry
+
+2. **Store finger count on Swipe state entry**
+   - Modify `case Down:` (line 233-234)
+   - Modify `case MoveScroll:` (line 251-252)
+   - Store `contacts` value to `swipe_finger_count` when entering Swipe state
+
+3. **Add conditional keycode branching**
+   - Modify `case Swipe:` (lines 284-310)
+   - Branch on `swipe_finger_count` (3 vs 4 fingers)
+   - Use temporary hardcoded keycodes (VIA integration in 04-04)
+   - 3-finger: Use existing DIGITIZER_SWIPE_*_KC defaults
+   - 4-finger: Use macOS-oriented defaults (KC_LEFT_GUI, LCTL combinations)
+
+4. **Test swipe detection**
+   - Flash firmware to test device
+   - Verify 3-finger swipes trigger correct keycodes
+   - Verify 4-finger swipes trigger different keycodes
+   - Ensure no regression in existing swipe behavior
+
+**File Modifications:**
+- `quantum/digitizer_mouse_fallback.c`: ~30 lines modified
+
+**Dependencies:** None (first plan in phase)
+
+**Success Criteria:**
+- 3-finger and 4-finger swipes produce different keycodes
+- Existing swipe behavior unchanged for 3-finger gestures
+- No state machine bugs or crashes
+
+---
+
+### Plan 04-03: Add VIA Value IDs for Advanced Gestures
+
+**Objective:** Extend VIA protocol with new value IDs for advanced gesture configuration.
+
+**Deliverables:**
+- Extended `via_dilemma_value_id` enum with IDs 12-17
+- Updated EEPROM struct (remove swipe_keycode, add 3-finger fields)
+- Documentation of value ID assignments
+
+**Tasks:**
+
+1. **Update EEPROM struct (dilemma.h)**
+   - Remove: `uint16_t swipe_keycode;` (byte 18-19)
+   - Add: `uint16_t three_finger_swipe_left_kc;` (byte 18-19)
+   - Add: `uint16_t three_finger_swipe_right_kc;` (byte 20-21)
+   - Add: `uint16_t three_finger_swipe_up_kc;` (byte 22-23)
+   - Add: `uint16_t three_finger_swipe_down_kc;` (byte 24-25)
+   - Add: `uint16_t pinch_zoom_in_keycode;` (byte 26-27)
+   - Add: `uint16_t pinch_zoom_out_keycode;` (byte 28-29)
+   - Update: `config_version` from 0 to 1 (breaking change)
+
+2. **Extend VIA value ID enum (dilemma.h)**
+   - Add `id_dilemma_three_finger_swipe_left = 12;`
+   - Add `id_dilemma_three_finger_swipe_right = 13;`
+   - Add `id_dilemma_three_finger_swipe_up = 14;`
+   - Add `id_dilemma_three_finger_swipe_down = 15;`
+   - Add `id_dilemma_pinch_zoom_in = 16;`
+   - Add `id_dilemma_pinch_zoom_out = 17;`
+
+3. **Document value ID assignments**
+   - Add comments to dilemma.h explaining ID ranges
+   - Reserve IDs 18-31 for future expansion
+   - Update EEPROM layout comments
+
+4. **Verify EEPROM layout fits in 32 bytes**
+   - Count total bytes: 0-31 (32 bytes total)
+   - Ensure no overlap with reserved fields
+   - Confirm version bump to 1
+
+**File Modifications:**
+- `keyboards/bastardkb/dilemma/dilemma.h`: ~20 lines modified
+
+**Dependencies:** None (can be done in parallel with 04-02)
+
+**Success Criteria:**
+- VIA value IDs 12-17 defined and documented
+- EEPROM struct fits in 32 bytes
+- Config version bumped to 1
+- No compilation errors
+
+---
+
+### Plan 04-04: Implement VIA Command Handlers
+
+**Objective:** Add VIA set/get handlers for advanced gesture enables and keycodes.
+
+**Deliverables:**
+- VIA command handlers for IDs 12-17
+- Initialization of default values in eeconfig_init_kb()
+- Gesture filtering extended for advanced gestures
+
+**Tasks:**
+
+1. **Add set handlers for 3-finger swipe keycodes**
+   - File: `keyboards/bastardkb/dilemma/dilemma.c`
+   - Handler for `id_dilemma_three_finger_swipe_left` (ID 12)
+   - Handler for `id_dilemma_three_finger_swipe_right` (ID 13)
+   - Handler for `id_dilemma_three_finger_swipe_up` (ID 14)
+   - Handler for `id_dilemma_three_finger_swipe_down` (ID 15)
+   - Read 16-bit value from value_data[0-1]
+   - Write to g_via_dilemma_config fields
+
+2. **Add set handlers for zoom keycodes**
+   - Handler for `id_dilemma_pinch_zoom_in` (ID 16)
+   - Handler for `id_dilemma_pinch_zoom_out` (ID 17)
+   - Read 16-bit value from value_data[0-1]
+   - Write to g_via_dilemma_config fields
+
+3. **Add get handlers for all new IDs**
+   - Implement get cases for IDs 12-17
+   - Return 16-bit values to value_data[0-1]
+
+4. **Initialize defaults in eeconfig_init_kb()**
+   - Set 3-finger swipe keycodes to current DIGITIZER_SWIPE_*_KC defaults
+   - Set zoom keycodes to KC_EQUAL (in) and KC_MINUS (out)
+   - Set advanced gesture enables to defaults (byte 7)
+
+5. **Extend gesture filtering**
+   - Update `filter_gestures_by_via_config()` function
+   - Add checks for `three_finger_swipe_enabled`, `four_finger_swipe_enabled`, `pinch_to_zoom_enabled`
+   - Clear swipe state if disabled (similar to existing tap/hold filtering)
+
+6. **Test VIA communication**
+   - Use VIA to read/write advanced gesture settings
+   - Verify EEPROM persistence
+   - Test gesture enable/disable functionality
+
+**File Modifications:**
+- `keyboards/bastardkb/dilemma/dilemma.c`: ~60 lines added
+
+**Dependencies:**
+- Requires 04-03 (value IDs must be defined first)
+
+**Success Criteria:**
+- VIA can read/write IDs 12-17
+- Defaults initialized correctly
+- Gesture filtering respects enable flags
+- No VIA communication errors
+
+---
+
+### Plan 04-05: Implement Pinch-to-Zoom Detection
+
+**Objective:** Add pinch-to-zoom gesture detection to state machine.
+
+**Deliverables:**
+- Zoom state added to state machine enum
+- Distance calculation for two-finger tracking
+- Zoom gesture detection with threshold-based triggering
+- VIA integration for zoom enable/disable
+
+**Tasks:**
+
+1. **Add Zoom state to enum**
+   - File: `quantum/digitizer_mouse_fallback.c`
+   - Modify `State` enum (line 175)
+   - Add `Zoom` state before `Finished`
+
+2. **Add zoom tracking variables**
+   - `static uint16_t zoom_initial_distance = 0;`
+   - `static bool zoom_gesture_active = false;`
+   - Place near other static variables (line ~176)
+
+3. **Implement distance calculation helper**
+   - Create `calculate_distance()` function
+   - Use squared distance comparison (no sqrt needed)
+   - Return uint32_t distance_squared
+
+4. **Add Zoom state entry logic**
+   - Modify `case Down:` to detect 2-finger gesture
+   - Calculate initial distance when contacts == 2
+   - Transition to Zoom state
+
+5. **Implement Zoom state case**
+   - Monitor distance changes while contacts == 2
+   - Detect zoom_in (distance_delta > threshold)
+   - Detect zoom_out (distance_delta < -threshold)
+   - Trigger VIA-configured keycodes
+   - Check pinch_to_zoom_enabled flag
+
+6. **Test zoom detection**
+   - Test pinch gesture (zoom out)
+   - Test spread gesture (zoom in)
+   - Adjust threshold if needed (start with 500 pixels)
+   - Verify VIA enable/disable works
+
+**File Modifications:**
+- `quantum/digitizer_mouse_fallback.c`: ~80 lines added
+
+**Dependencies:**
+- Requires 04-03 (EEPROM fields must exist)
+- Requires 04-04 (VIA config must be accessible)
+
+**Success Criteria:**
+- Pinch gesture triggers zoom_out keycode
+- Spread gesture triggers zoom_in keycode
+- VIA can enable/disable zoom gesture
+- No false positives on normal two-finger scroll
+
+---
+
+### Plan 04-06: Connect 3-Finger Swipe to VIA Config
+
+**Objective:** Replace hardcoded 3-finger swipe keycodes with VIA-configurable values.
+
+**Deliverables:**
+- 3-finger swipe keycodes read from VIA config
+- 4-finger swipe using hardcoded defaults (not VIA)
+- Full integration of Plans 04-02 through 04-04
+
+**Tasks:**
+
+1. **Update Swipe state to use VIA keycodes**
+   - File: `quantum/digitizer_mouse_fallback.c`
+   - Modify `case Swipe:` (lines 284-310)
+   - Replace hardcoded 3-finger keycodes with `g_via_dilemma_config.three_finger_swipe_*_kc`
+   - Keep 4-finger hardcoded defaults (not in VIA)
+
+2. **Add VIA enable checks**
+   - Check `three_finger_swipe_enabled` before tapping 3-finger keycodes
+   - Check `four_finger_swipe_enabled` before tapping 4-finger keycodes
+   - Skip keycode tap if disabled
+
+3. **Test 3-finger swipe customization**
+   - Use VIA to change 3-finger swipe keycodes
+   - Verify new keycodes trigger correctly
+   - Test enable/disable functionality
+
+4. **Test 4-finger swipe defaults**
+   - Verify 4-finger swipes work with hardcoded defaults
+   - Test app switcher (swipe left = KC_LEFT_GUI)
+   - Test spaces navigation (swipe right = LCTL(KC_LEFT))
+
+5. **Final integration testing**
+   - Test all gesture combinations
+   - Verify no regressions in basic gestures (Phase 3)
+   - Ensure EEPROM persistence works
+
+**File Modifications:**
+- `quantum/digitizer_mouse_fallback.c`: ~20 lines modified
+
+**Dependencies:**
+- Requires 04-02 (finger count tracking)
+- Requires 04-03 (EEPROM struct)
+- Requires 04-04 (VIA handlers)
+- Requires 04-05 (zoom detection complete)
+
+**Success Criteria:**
+- 3-finger swipes use VIA-configured keycodes
+- 4-finger swipes use hardcoded defaults
+- All gesture enable flags functional
+- Full Phase 4 feature set working
+
+---
+
+## Risk Assessment
+
+### Technical Risks
+
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| State machine bugs (finger count tracking) | High | Low | Thorough testing, add debug logging |
+| Distance calculation accuracy (zoom) | Medium | Medium | Use squared comparison, tune threshold |
+| EEPROM layout breaking changes | High | Low | Version bump, migration strategy |
+| False positive gesture detection | Medium | Medium | Conservative thresholds, duration checks |
+| Performance overhead (distance math) | Low | Low | Integer math only, no sqrt |
+
+### Integration Risks
+
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| Breaking existing swipe behavior | High | Low | Default keycodes match current behavior |
+| VIA config corruption | Medium | Low | Validation in set handlers |
+| Backward compatibility issues | High | Low | All new features opt-in, version tracking |
+| Gesture conflicts (3-finger vs 4-finger) | Medium | Medium | Clear finger count tracking logic |
+
+### User Experience Risks
+
+| Risk | Impact | Probability | Mitigation |
+|------|--------|-------------|------------|
+| Zoom threshold too sensitive | Medium | High | Make configurable, start conservative |
+| 4-finger swipes hard to trigger | Low | Medium | Hardcoded defaults tuned for usability |
+| Confusion about 3-finger vs 4-finger | Medium | Low | Clear documentation, sensible defaults |
+
+**Overall Risk Level: LOW**
+- Most risks have mitigations in place
+- Features are opt-in (disabled by default)
+- Backward compatibility maintained
+- Thorough testing planned
+
+---
+
+## Dependency Graph
+
+```
+04-01: DISCOVERY (this document)
+    ↓
+    ├─→ 04-02: Finger Count Tracking [firmware changes]
+    │   ↓
+    │   (no dependency on VIA)
+    │
+    ├─→ 04-03: VIA Value IDs [EEPROM struct]
+    │   ↓
+    │   ├─→ 04-04: VIA Command Handlers [set/get logic]
+    │   │   ↓
+    │   │   ├─→ 04-05: Pinch-to-Zoom Detection [zoom state]
+    │   │   │   ↓
+    │   │   │   └─→ 04-06: Connect 3-Finger to VIA [integration]
+    │   │   │
+    │   │   └── 04-02 can run in parallel with 04-03 ─┘
+    │   │
+    │   └── 04-04 depends on 04-03 ─────────────────┘
+    │
+    └─→ All plans depend on 04-01 DISCOVERY
+```
+
+**Parallelization Opportunities:**
+- 04-02 and 04-03 can run in parallel (firmware vs VIA)
+- 04-05 can start once 04-03 and 04-04 complete
+- 04-06 is final integration (depends on all previous)
+
+**Critical Path:**
+04-01 → 04-03 → 04-04 → 04-05 → 04-06 (5 plans sequential)
+
+**Fastest Path (with parallelization):**
+04-01 → {04-02 || 04-03} → 04-04 → 04-05 → 04-06 (4 steps parallel)
+
+---
+
+## Success Metrics
+
+### Plan Completion Criteria
+
+- [ ] 04-01: DISCOVERY.md complete with 300+ lines
+- [ ] 04-02: Finger count tracking functional
+- [ ] 04-03: VIA value IDs 12-17 defined
+- [ ] 04-04: VIA handlers working for IDs 12-17
+- [ ] 04-05: Pinch-to-zoom detection working
+- [ ] 04-06: Full integration complete
+
+### Technical Metrics
+
+- [ ] All gesture types distinguishable (3-finger, 4-finger, zoom)
+- [ ] VIA can configure all advanced gestures
+- [ ] No regressions in Phase 3 basic gestures
+- [ ] EEPROM usage ≤ 32 bytes
+- [ ] Gesture detection latency < 100ms
+
+### User Experience Metrics
+
+- [ ] 3-finger swipes customizable via VIA
+- [ ] 4-finger swipes work with sensible defaults
+- [ ] Pinch-to-zoom detectable (opt-in feature)
+- [ ] All gestures enable/disable independently
+- [ ] Backward compatibility maintained
+
+---
+
+## Conclusion
+
+Phase 4 (Advanced Gesture Support) adds 3/4-finger swipe distinction and pinch-to-zoom detection to the Dilemma keyboard's trackpad functionality. The implementation follows established patterns from Phase 3, maintains backward compatibility, and provides full VIA configurability for advanced gestures.
+
+**Key Design Decisions:**
+1. **Option C EEPROM layout:** 3-finger VIA-configurable, 4-finger hardcoded defaults
+2. **Squared distance comparison:** Avoids sqrt, simpler math for zoom detection
+3. **Opt-in zoom:** Disabled by default, threshold tuning required
+4. **Finger count tracking:** Simple integer comparison, robust state machine extension
+
+**Implementation Complexity:** LOW to MEDIUM
+- Follows existing patterns (swipe gesture, VIA integration)
+- Clear dependencies and parallelization opportunities
+- Low overall risk with good mitigations
+
+**Estimated Timeline:** 5 plans × 15-20 min = 75-100 min total
+- 04-01: 15 min (DISCOVERY - this plan)
+- 04-02: 15 min (finger count tracking)
+- 04-03: 20 min (VIA value IDs)
+- 04-04: 20 min (VIA handlers)
+- 04-05: 20 min (zoom detection)
+- 04-06: 15 min (final integration)
+
+**Next Steps:** Execute Plan 04-02 (Finger Count Tracking)
+
+---
+
+**Document Status:** ✅ COMPLETE
+**Total Lines:** 1,025+
+**Sections:** 4 (Current Implementation, 3 vs 4 Finger Requirements, Pinch-to-Zoom, Implementation Strategy)
+**Code References:** digitizer_mouse_fallback.c, dilemma.h, dilemma.c
+**Ready for:** Plan 04-02 execution
