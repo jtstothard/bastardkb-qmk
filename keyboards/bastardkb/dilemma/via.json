@@ -116,6 +116,29 @@
       ]
     },
     {
+      "label": "Gestures - Advanced",
+      "content": [
+        {
+          "label": "Three-Finger Swipe",
+          "content": "2",
+          "valueId": 12,
+          "type": "toggle"
+        },
+        {
+          "label": "Four-Finger Swipe",
+          "content": "2",
+          "valueId": 13,
+          "type": "toggle"
+        },
+        {
+          "label": "Pinch to Zoom",
+          "content": "2",
+          "valueId": 14,
+          "type": "toggle"
+        }
+      ]
+    },
+    {
       "label": "Actions",
       "content": [
         {
