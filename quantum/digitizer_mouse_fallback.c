@@ -29,6 +29,10 @@ typedef struct {
 #        define DIGITIZER_MOUSE_TAP_DISTANCE 25
 #    endif
 
+#    ifndef DIGITIZER_FORCE_CLICK_TIMEOUT
+#        define DIGITIZER_FORCE_CLICK_TIMEOUT 600  // 600ms = force click threshold
+#    endif
+
 #    ifndef DIGITIZER_SCROLL_DIVISOR
 #        define DIGITIZER_SCROLL_DIVISOR 10
 #    endif
