@@ -1,0 +1,136 @@
+{
+  "customMenu": [
+    {
+      "label": "Pointer",
+      "content": [
+        {
+          "label": "DPI Preset",
+          "content": ["0", "1", "2", "3", "4", "5", "6"],
+          "valueId": 2,
+          "type": "slider",
+          "format": {
+            "left": "200",
+            "right": "1200"
+          }
+        },
+        {
+          "label": "Custom DPI",
+          "content": "uint16",
+          "valueId": 3,
+          "type": "uint16",
+          "format": {
+            "min": 200,
+            "max": 4000
+          }
+        },
+        {
+          "label": "Sniping DPI",
+          "content": ["0", "1", "2", "3"],
+          "valueId": 4,
+          "type": "slider",
+          "format": {
+            "left": "200",
+            "right": "800"
+          }
+        },
+        {
+          "label": "Drag Scroll",
+          "content": "2",
+          "valueId": 0,
+          "type": "none"
+        }
+      ]
+    },
+    {
+      "label": "Scroll",
+      "content": [
+        {
+          "label": "Drag Scroll X Divisor",
+          "content": "uint8",
+          "valueId": 4,
+          "type": "uint8",
+          "format": {
+            "min": 1,
+            "max": 15
+          }
+        },
+        {
+          "label": "Drag Scroll Y Divisor",
+          "content": "uint8",
+          "valueId": 5,
+          "type": "uint8",
+          "format": {
+            "min": 1,
+            "max": 15
+          }
+        },
+        {
+          "label": "Two-Finger Scroll X Divisor",
+          "content": "uint8",
+          "valueId": 6,
+          "type": "uint8",
+          "format": {
+            "min": 1,
+            "max": 15
+          }
+        },
+        {
+          "label": "Two-Finger Scroll Y Divisor",
+          "content": "uint8",
+          "valueId": 7,
+          "type": "uint8",
+          "format": {
+            "min": 1,
+            "max": 15
+          }
+        }
+      ]
+    },
+    {
+      "label": "Gestures - Basic",
+      "content": [
+        {
+          "label": "Tap to Click",
+          "content": "2",
+          "valueId": 8,
+          "type": "toggle"
+        },
+        {
+          "label": "Two-Finger Tap",
+          "content": "2",
+          "valueId": 9,
+          "type": "toggle"
+        },
+        {
+          "label": "Two-Finger Scroll",
+          "content": "2",
+          "valueId": 10,
+          "type": "toggle"
+        },
+        {
+          "label": "Press and Hold",
+          "content": "2",
+          "valueId": 11,
+          "type": "toggle"
+        }
+      ]
+    },
+    {
+      "label": "Actions",
+      "content": [
+        {
+          "label": "Save",
+          "content": "0",
+          "valueId": 1,
+          "type": "action"
+        },
+        {
+          "label": "Reset to Defaults",
+          "content": "1",
+          "valueId": 0,
+          "type": "action"
+        }
+      ]
+    }
+  ]
+}
