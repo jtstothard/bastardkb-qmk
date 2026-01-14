@@ -224,6 +224,61 @@
       ]
     },
     {
+      "label": "Gesture Keycodes",
+      "content": [
+        {
+          "label": "Tap Keycode",
+          "content": "uint16",
+          "valueId": 0,
+          "type": "none"
+        },
+        {
+          "label": "Two-Finger Tap Keycode",
+          "content": "uint16",
+          "valueId": 0,
+          "type": "none"
+        },
+        {
+          "label": "Two-Finger Scroll Up Keycode",
+          "content": "uint16",
+          "valueId": 0,
+          "type": "none"
+        },
+        {
+          "label": "Two-Finger Scroll Down Keycode",
+          "content": "uint16",
+          "valueId": 0,
+          "type": "none"
+        },
+        {
+          "label": "Press and Hold Keycode",
+          "content": "uint16",
+          "valueId": 0,
+          "type": "none"
+        },
+        {
+          "label": "Zoom In Keycode",
+          "content": "uint16",
+          "valueId": 23,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        },
+        {
+          "label": "Zoom Out Keycode",
+          "content": "uint16",
+          "valueId": 24,
+          "type": "uint16",
+          "format": {
+            "min": 0,
+            "max": 65535
+          }
+        }
+      ]
+    },
+    {
       "label": "Actions",
       "content": [
         {
