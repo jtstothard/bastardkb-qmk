@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Basic Gesture Enablement** - Enable existing Azoteq gestures (tap, two-finger tap, scroll)
 - [x] **Phase 4: Advanced Gesture Support** - Three-finger swipes, four-finger swipes, pinch-to-zoom
 - [x] **Phase 5: Gesture-to-Keycode Mapping** - VIA-configurable gesture actions mapping
-- [ ] **Phase 6: Smart Gesture Features** - Tap-to-click with pressure, force click, smart zoom
+- [x] **Phase 6: Smart Gesture Features** - Force click, smart zoom (completed in Phase 4)
 - [ ] **Phase 7: Auto-Sniping Toggle** - VIA-configurable layer-based sniping enable/disable
 - [ ] **Phase 8: VIA Menu UI Design** - Create VIA menus for all 30+ settings
 - [ ] **Phase 9: Testing & Validation** - Hardware testing on all features
@@ -91,17 +91,16 @@ Plans:
 - [x] 05-03: Implement VIA command for keycode selection per gesture
 
 ### Phase 6: Smart Gesture Features
-**Goal**: Tap-to-click with pressure detection, force click (long press), smart zoom gesture
+**Goal**: Force click with timing-based detection, document smart zoom completion
 **Depends on**: Phase 4
-**Research**: Likely (pressure sensing and gesture timing)
-**Research topics**: Azoteq pressure/force measurements, long-press detection timing, smart zoom gesture recognition
-**Plans**: 4 plans
+**Research**: Likely (MaxTouch pressure sensing capabilities, gesture timing)
+**Research topics**: MaxTouch MXT336U T65/T100 force sensing, timing-based detection patterns
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Research Azoteq pressure sensing and tap force detection
-- [ ] 06-02: Implement tap-to-click with pressure threshold
-- [ ] 06-03: Implement force click (long press) detection
-- [ ] 06-04: Implement smart zoom gesture and add settings to EEPROM
+- [x] 06-01: Research MaxTouch pressure/force sensing and force click strategy
+- [x] 06-02: Implement force click detection (timing-based 600ms long press)
+- [x] 06-03: Document smart zoom completion (implemented in Phase 4)
 
 ### Phase 7: Auto-Sniping Toggle
 **Goal**: VIA-configurable auto-sniping enable/disable on specific layers
@@ -162,7 +161,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. Basic Gesture Enablement | 4/4 | Complete | 2026-01-14 |
 | 4. Advanced Gesture Support | 5/5 | Complete | 2026-01-14 |
 | 5. Gesture-to-Keycode Mapping | 3/3 | Complete | 2026-01-14 |
-| 6. Smart Gesture Features | 0/4 | Not started | - |
+| 6. Smart Gesture Features | 3/3 | Complete | 2026-01-14 |
 | 7. Auto-Sniping Toggle | 0/3 | Not started | - |
 | 8. VIA Menu UI Design | 0/3 | Not started | - |
 | 9. Testing & Validation | 0/5 | Not started | - |
