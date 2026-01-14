@@ -331,6 +331,100 @@ void eeconfig_init_kb(void) {
     eeconfig_init_user();
 }
 
+// VIA Custom Configuration
+// VIA EEPROM custom config is enabled (VIA_EEPROM_CUSTOM_CONFIG_SIZE = 32)
+
+#include "via.h"
+
+via_dilemma_config_t g_via_dilemma_config = {0};
+
+// Read custom config from EEPROM
+static void read_via_dilemma_config(void) {
+    nvm_via_read_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
+}
+
+// Write custom config to EEPROM
+static void write_via_dilemma_config(void) {
+    nvm_via_update_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
+}
+
+// VIA custom value command handler
+void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
+    // data = [command_id, channel_id, value_id, value_data...]
+    uint8_t *command_id = &(data[0]);
+    uint8_t *value_id   = &(data[2]);
+    uint8_t *value_data = &(data[3]);
+
+    switch (*command_id) {
+        case id_custom_set_value: // 0x07
+            // Write value to config
+            switch (*value_id) {
+                case id_dilemma_dpi_preset:
+                    g_via_dilemma_config.dpi_preset = value_data[0];
+                    break;
+                case id_dilemma_custom_dpi:
+                    // 12-bit value across 2 bytes
+                    g_via_dilemma_config.custom_dpi = ((uint16_t)value_data[1] << 8) | value_data[0];
+                    break;
+                case id_dilemma_drag_scroll_x:
+                    g_via_dilemma_config.drag_scroll_x_divisor = value_data[0];
+                    break;
+                case id_dilemma_drag_scroll_y:
+                    g_via_dilemma_config.drag_scroll_y_divisor = value_data[0];
+                    break;
+                case id_dilemma_two_finger_x:
+                    g_via_dilemma_config.two_finger_x_divisor = value_data[0];
+                    break;
+                case id_dilemma_two_finger_y:
+                    g_via_dilemma_config.two_finger_y_divisor = value_data[0];
+                    break;
+                // Add more setters for each value_id
+                default:
+                    *command_id = id_unhandled; // Unknown value ID
+                    break;
+            }
+            break;
+
+        case id_custom_get_value: // 0x08
+            // Read value from config
+            switch (*value_id) {
+                case id_dilemma_dpi_preset:
+                    value_data[0] = g_via_dilemma_config.dpi_preset;
+                    break;
+                case id_dilemma_custom_dpi:
+                    value_data[0] = g_via_dilemma_config.custom_dpi & 0xFF;
+                    value_data[1] = (g_via_dilemma_config.custom_dpi >> 8) & 0xFF;
+                    break;
+                case id_dilemma_drag_scroll_x:
+                    value_data[0] = g_via_dilemma_config.drag_scroll_x_divisor;
+                    break;
+                case id_dilemma_drag_scroll_y:
+                    value_data[0] = g_via_dilemma_config.drag_scroll_y_divisor;
+                    break;
+                case id_dilemma_two_finger_x:
+                    value_data[0] = g_via_dilemma_config.two_finger_x_divisor;
+                    break;
+                case id_dilemma_two_finger_y:
+                    value_data[0] = g_via_dilemma_config.two_finger_y_divisor;
+                    break;
+                // Add more getters for each value_id
+                default:
+                    *command_id = id_unhandled;
+                    break;
+            }
+            break;
+
+        case id_custom_save: // 0x09
+            // Persist config to EEPROM
+            write_via_dilemma_config();
+            break;
+
+        default:
+            *command_id = id_unhandled;
+            break;
+    }
+}
+
 void matrix_init_kb(void) {
     read_dilemma_config_from_eeprom(&g_dilemma_config);
     matrix_init_user();
