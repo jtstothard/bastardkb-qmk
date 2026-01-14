@@ -879,6 +879,12 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                     value_data[0] = (g_via_dilemma_config.zoom_out_keycode >> 8) & 0xFF;
                     value_data[1] = g_via_dilemma_config.zoom_out_keycode & 0xFF;
                     break;
+                case id_dilemma_auto_snipe_enable:
+                    value_data[0] = g_via_dilemma_config.auto_snipe_enabled;
+                    break;
+                case id_dilemma_auto_snipe_layer:
+                    value_data[0] = g_via_dilemma_config.auto_snipe_layer;
+                    break;
                 // Add more getters for each value_id
                 default:
                     *command_id = id_unhandled;
