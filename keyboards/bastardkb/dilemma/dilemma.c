@@ -542,6 +542,29 @@ void eeconfig_init_kb(void) {
     g_via_dilemma_config.two_finger_tap_enabled = 0;     // Disabled by default
     g_via_dilemma_config.two_finger_scroll_enabled = 1;  // Enabled by default (already working)
     g_via_dilemma_config.press_and_hold_enabled = 0;     // Disabled by default
+
+    // Byte 7: Advanced gesture enables
+    g_via_dilemma_config.three_finger_swipe_enabled = 1;  // ON - core feature
+    g_via_dilemma_config.four_finger_swipe_enabled = 0;   // OFF - advanced feature
+    g_via_dilemma_config.pinch_to_zoom_enabled = 0;        // OFF - not yet implemented
+
+    // Bytes 18-37: Advanced gesture keycodes
+    // 3-finger swipes (match existing defaults)
+    g_via_dilemma_config.three_finger_swipe_left_keycode = QK_MOUSE_BUTTON_3;
+    g_via_dilemma_config.three_finger_swipe_right_keycode = QK_MOUSE_BUTTON_4;
+    g_via_dilemma_config.three_finger_swipe_up_keycode = KC_LEFT_GUI;
+    g_via_dilemma_config.three_finger_swipe_down_keycode = KC_ESC;
+
+    // 4-finger swipes (macOS defaults)
+    g_via_dilemma_config.four_finger_swipe_left_keycode = LCTL(KC_LEFT);
+    g_via_dilemma_config.four_finger_swipe_right_keycode = LCTL(KC_RIGHT);
+    g_via_dilemma_config.four_finger_swipe_up_keycode = KC_F11;
+    g_via_dilemma_config.four_finger_swipe_down_keycode = KC_F10;
+
+    // Pinch-to-zoom (common defaults)
+    g_via_dilemma_config.zoom_in_keycode = KC_EQUAL;
+    g_via_dilemma_config.zoom_out_keycode = KC_MINUS;
+
     g_via_dilemma_config.config_version = 1;
     write_via_dilemma_config();
 
