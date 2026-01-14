@@ -126,12 +126,15 @@ static uint16_t digitizer_get_cpi(void) {
     return mouse_cpi;
 }
 
+static uint16_t last_mouse_cpi = 0;
+
 /**
  * @brief Sets the CPI used by the digitizer mouse fallback feature.
  *
  *  @param[in] the new CPI value
  */
 static void digitizer_set_cpi(uint16_t cpi) {
+    last_mouse_cpi = mouse_cpi;
     mouse_cpi = CLIP(cpi, DIGITIZER_MIN_CPI, DIGITIZER_MAX_CPI);
     digitizer_set_scale((mouse_cpi * 100) / DIGITIZER_MAX_CPI);
 }
@@ -207,8 +210,16 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             if (contacts == 0) {
                 state = None;
             } else if (contacts == 1) {
-                mouse_report.x = x - last_x;
-                mouse_report.y = y - last_y;
+                // Skip delta calculation on the first frame after CPI change to prevent cursor jump
+                // When CPI changes, last_x/last_y are at old scale, causing large spike
+                if (last_mouse_cpi && mouse_cpi == last_mouse_cpi) {
+                    mouse_report.x = x - last_x;
+                    mouse_report.y = y - last_y;
+                } else {
+                    // CPI changed or first call - skip this frame's delta to prevent jump
+                    // Reset tracking so next frame calculates from current position
+                    last_mouse_cpi = mouse_cpi;
+                }
             } else if (contacts == 3 && duration < DIGITIZER_MOUSE_SWIPE_TIMEOUT) {
                 state = Swipe;
             } else {
