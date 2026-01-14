@@ -365,12 +365,13 @@ static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
         }
     } else {
         // Two-finger scroll mode: apply VIA two-finger divisor to digitizer scroll
+        // (only if enabled in VIA config)
         // The digitizer driver has already applied DIGITIZER_SCROLL_DIVISOR,
         // so we apply an additional divisor here for fine-grained control
-        if (mouse_report->h != 0 && g_current_scroll_x_divisor > 1) {
+        if (mouse_report->h != 0 && g_via_dilemma_config.two_finger_scroll_enabled && g_current_scroll_x_divisor > 1) {
             mouse_report->h = mouse_report->h / g_current_scroll_x_divisor;
         }
-        if (mouse_report->v != 0 && g_current_scroll_y_divisor > 1) {
+        if (mouse_report->v != 0 && g_via_dilemma_config.two_finger_scroll_enabled && g_current_scroll_y_divisor > 1) {
             mouse_report->v = mouse_report->v / g_current_scroll_y_divisor;
         }
     }
