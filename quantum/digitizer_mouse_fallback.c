@@ -177,6 +177,9 @@ typedef enum { None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Finish
 static State state     = None;
 static int   tap_count = 0;
 
+// Track finger count during swipe gestures (3 vs 4 fingers)
+static int swipe_finger_count = 0;
+
 /**
  * \brief Signals that a gesture is in progress so digitizer_update_mouse_report should be called,
  * even if no new digitizer data is available.
