@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-14)
 
 **Core value:** VIA customization interface - If this fails, nothing else matters. Every feature (gestures, scroll divisors, DPI controls) must be configurable through VIA without requiring firmware rebuilds.
-**Current focus:** Phase 6 — Smart Gesture Features
+**Current focus:** Phase 7 — Auto-Sniping Toggle
 
 ## Current Position
 
-Phase: 6 of 12 (Smart Gesture Features)
-Plan: 3 of 3 in current phase
-Status: Phase 6 complete - All smart gesture features implemented (force click functional, smart zoom complete from Phase 4)
-Last activity: 2026-01-14 — Completed Plan 06-03 (Smart Zoom Gesture Documentation)
+Phase: 7 of 12 (Auto-Sniping Toggle)
+Plan: 1 of 3 in current phase
+Status: In progress - VIA value IDs added for auto-snipe configuration
+Last activity: 2026-01-14 — Completed Plan 07-01 (Auto-Snipe VIA Value IDs)
 
-Progress: ██████████ 100%
+Progress: ██████████ 95%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 15 min
-- Total execution time: 4.9 hours
+- Total plans completed: 21
+- Average duration: 14.3 min
+- Total execution time: 5.0 hours
 
 **By Phase:**
 
@@ -87,10 +87,31 @@ None yet.
 
 None yet.
 
+## Plan 07-01 Summary
+
+**Duration:** 2 minutes (1 task, 1 atomic commit)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added auto-snipe VIA value IDs (25-26) to dilemma.h enum
+
+**Key Achievements:**
+- VIA value ID 25 (id_dilemma_auto_snipe_enable) for enable/disable flag
+- VIA value ID 26 (id_dilemma_auto_snipe_layer) for target layer (0-127)
+- Maps to existing EEPROM fields in via_dilemma_config_t (Byte 5)
+- Sequential numbering follows existing pattern (continues from id_dilemma_zoom_out_keycode = 24)
+- Inline comments document EEPROM byte/bit layout for maintainability
+- Ready for Plan 07-03 VIA command handler implementation
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.h (+4 lines: VIA value IDs 25-26 with EEPROM mapping comments)
+
+**Summary:** .planning/phases/07-auto-sniping-toggle/07-01-SUMMARY.md
+
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 06-02 (Force Click Detection Implementation)
+Stopped at: Completed Plan 07-01 (Auto-Snipe VIA Value IDs)
 Resume file: None
 
 ## Plan 06-02 Summary
