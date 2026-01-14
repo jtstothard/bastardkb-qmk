@@ -222,6 +222,36 @@ static void update_scroll_divisors(void) {
     }
 }
 
+/**
+ * \brief Update gesture state from digitizer events.
+ *
+ * Reads gesture flags from digitizer report and updates g_gesture_state.
+ * Called from pointing_device_task_dilemma() on each iteration.
+ *
+ * Note: This function only READS gesture state from hardware.
+ * Gesture filtering based on VIA config happens separately.
+ *
+ * TODO: Implement actual digitizer gesture read based on 03-01 findings.
+ * MaxTouch MXT336U has no hardware gesture registers (unlike Azoteq IQS5xx),
+ * so gesture detection happens in firmware via digitizer_mouse_fallback.c state machine.
+ * Future implementation will integrate with that state machine to track gesture status.
+ */
+static void update_gesture_state(void) {
+    // TODO: Implement actual digitizer gesture read based on 03-01 findings
+    // For now, this is a placeholder for the integration point
+    //
+    // From 03-01 DISCOVERY.md:
+    // - MaxTouch has NO GESTURE_EVENTS registers like Azoteq IQS5xx
+    // - Gesture detection is firmware-based in digitizer_mouse_fallback.c
+    // - State machine tracks: None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Finished
+    // - Plan 03-03 will integrate VIA config filtering into that state machine
+    //
+    // Future implementation (Plan 03-03):
+    // - Access digitizer state machine to get current gesture state
+    // - Update g_gesture_state fields based on active gesture
+    // - This will be used by VIA config to enable/disable specific gestures
+}
+
 void pointing_device_init_kb(void) {
     maybe_update_pointing_device_cpi(&g_dilemma_config);
     pointing_device_init_user();
