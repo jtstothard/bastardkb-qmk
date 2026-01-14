@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 8 of 12 (VIA Menu UI Design)
-Plan: 1 of 3 in current phase
-Status: ✅ COMPLETE - VIA menu format research and menu design complete
-Last activity: 2026-01-14 — Completed Plan 08-01 (VIA Menu UI Design Discovery)
+Plan: 2 of 3 in current phase
+Status: ✅ COMPLETE - Basic VIA menu JSON structure created
+Last activity: 2026-01-14 — Completed Plan 08-02 (Basic VIA Menu JSON Structure)
 
-Progress: ██████░░░░ 33%
+Progress: ██████████ 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 14.1 min
-- Total execution time: 5.2 hours
+- Total plans completed: 23
+- Average duration: 13.8 min
+- Total execution time: 5.3 hours
 
 **By Phase:**
 
@@ -33,10 +33,10 @@ Progress: ██████░░░░ 33%
 | 4. Advanced Gesture Support | 6 | 6 | 15 min |
 | 6. Smart Gesture Features | 3 | 3 | 9 min |
 | 7. Auto-Sniping Toggle | 3 | 3 | 4 min |
-| 8. VIA Menu UI Design | 1 | 3 | 20 min |
+| 8. VIA Menu UI Design | 2 | 3 | 12 min |
 
 **Recent Trend:**
-- Last 5 plans: 08-01 (20 min), 07-03 (5 min), 07-02 (5 min), 07-01 (2 min), 06-02 (8 min)
+- Last 5 plans: 08-02 (5 min), 08-01 (20 min), 07-03 (5 min), 07-02 (5 min), 07-01 (2 min)
 - Trend: Stable | On track (Phase 8 progressing as planned)
 
 ## Accumulated Context
@@ -155,6 +155,38 @@ None yet.
 - .planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md (created, 351 lines)
 
 **Summary:** .planning/phases/08-via-menu-ui-design/08-01-SUMMARY.md
+
+## Plan 08-02 Summary
+
+**Duration:** 5 minutes (1 task, 1 atomic commit)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Created via.json with basic menu structure
+
+**Key Achievements:**
+- Comprehensive VIA menu JSON structure created (136 lines)
+- 4 top-level menus: Pointer, Scroll, Gestures - Basic, Actions
+- 14 menu items covering most common settings
+- All valueIds (0-11) mapped to dilemma.h enum definitions
+- Foundation established for Plan 08-03 (advanced menus)
+
+**Menu Structure:**
+- Pointer: 4 items (DPI preset, custom DPI, sniping DPI, drag scroll)
+- Scroll: 4 items (X/Y divisors for drag and two-finger scroll)
+- Gestures - Basic: 4 toggles (tap, two-finger tap, scroll, hold)
+- Actions: 2 items (save, reset)
+
+**Technical Implementation:**
+- UI control types: slider, uint16, uint8, toggle, action
+- Min/max validation matches firmware constraints
+- Drag Scroll as placeholder (valueId 0, special VIA handling)
+- Separate divisors for drag-scroll vs two-finger scroll modes
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/via.json (created, 136 lines)
+
+**Summary:** .planning/phases/08-via-menu-ui-design/08-02-SUMMARY.md
 
 ## Phase 7 Complete Summary
 
