@@ -279,6 +279,27 @@
       ]
     },
     {
+      "label": "Advanced Settings",
+      "content": [
+        {
+          "label": "Auto-Snipe Enable",
+          "content": "2",
+          "valueId": 25,
+          "type": "toggle"
+        },
+        {
+          "label": "Auto-Snipe Layer",
+          "content": "uint8",
+          "valueId": 26,
+          "type": "uint8",
+          "format": {
+            "min": 0,
+            "max": 127
+          }
+        }
+      ]
+    },
+    {
       "label": "Actions",
       "content": [
         {
