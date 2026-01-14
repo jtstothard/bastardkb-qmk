@@ -57,7 +57,11 @@ enum via_dilemma_value_id {
     id_dilemma_two_finger_tap_enable = 9,
     id_dilemma_two_finger_scroll_enable = 10,
     id_dilemma_press_and_hold_enable = 11,
-    // Add more IDs as needed for phases 4-12
+    // Advanced gesture enables (Byte 7)
+    id_dilemma_three_finger_swipe_enable = 12,
+    id_dilemma_four_finger_swipe_enable = 13,
+    id_dilemma_pinch_to_zoom_enable = 14,
+    // Add more IDs as needed for phases 5-12
 };
 
 // Global config instance (defined in dilemma.c)
