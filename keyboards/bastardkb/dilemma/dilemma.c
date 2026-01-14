@@ -216,21 +216,28 @@ void pointing_device_init_kb(void) {
 /**
  * \brief Augment the pointing device behavior.
  *
- * Implement drag-scroll.
+ * Implement drag-scroll with configurable divisors and apply
+ * VIA scroll divisors to two-finger scroll from digitizer.
  */
 static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
     static int16_t scroll_buffer_x = 0;
     static int16_t scroll_buffer_y = 0;
+
+    // Update scroll divisors based on current mode
+    update_scroll_divisors();
+
     if (g_dilemma_config.is_dragscroll_enabled) {
+        // Drag-scroll mode: convert trackball movement to scroll
+        // Apply VIA drag-scroll divisor to scale movement before accumulation
 #    ifdef DILEMMA_DRAGSCROLL_REVERSE_X
-        scroll_buffer_x -= mouse_report->x;
+        scroll_buffer_x -= (mouse_report->x / g_current_scroll_x_divisor);
 #    else
-        scroll_buffer_x += mouse_report->x;
+        scroll_buffer_x += (mouse_report->x / g_current_scroll_x_divisor);
 #    endif // DILEMMA_DRAGSCROLL_REVERSE_X
 #    ifdef DILEMMA_DRAGSCROLL_REVERSE_Y
-        scroll_buffer_y -= mouse_report->y;
+        scroll_buffer_y -= (mouse_report->y / g_current_scroll_y_divisor);
 #    else
-        scroll_buffer_y += mouse_report->y;
+        scroll_buffer_y += (mouse_report->y / g_current_scroll_y_divisor);
 #    endif // DILEMMA_DRAGSCROLL_REVERSE_Y
         mouse_report->x = 0;
         mouse_report->y = 0;
@@ -241,6 +248,16 @@ static void pointing_device_task_dilemma(report_mouse_t *mouse_report) {
         if (abs(scroll_buffer_y) > DILEMMA_DRAGSCROLL_BUFFER_SIZE) {
             mouse_report->v = scroll_buffer_y > 0 ? 1 : -1;
             scroll_buffer_y = 0;
+        }
+    } else {
+        // Two-finger scroll mode: apply VIA two-finger divisor to digitizer scroll
+        // The digitizer driver has already applied DIGITIZER_SCROLL_DIVISOR,
+        // so we apply an additional divisor here for fine-grained control
+        if (mouse_report->h != 0 && g_current_scroll_x_divisor > 1) {
+            mouse_report->h = mouse_report->h / g_current_scroll_x_divisor;
+        }
+        if (mouse_report->v != 0 && g_current_scroll_y_divisor > 1) {
+            mouse_report->v = mouse_report->v / g_current_scroll_y_divisor;
         }
     }
 }
@@ -426,6 +443,8 @@ static void apply_via_dilemma_config(void) {
     if (dpi > 0) {
         pointing_device_set_cpi(dpi);
     }
+    // Update scroll divisors after VIA config changes
+    update_scroll_divisors();
 }
 
 // Read custom config from EEPROM
