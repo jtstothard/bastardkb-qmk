@@ -42,6 +42,22 @@ enum dilemma_keycodes {
 #        define DRG_TOG DRAGSCROLL_MODE_TOGGLE
 #    endif // !NO_DILEMMA_KEYCODES
 
+// VIA Custom Value IDs
+enum via_dilemma_value_id {
+    id_dilemma_unhandled = 0, // Must be 0
+    id_dilemma_config_save = 1,
+    id_dilemma_dpi_preset = 2,
+    id_dilemma_custom_dpi = 3,
+    id_dilemma_drag_scroll_x = 4,
+    id_dilemma_drag_scroll_y = 5,
+    id_dilemma_two_finger_x = 6,
+    id_dilemma_two_finger_y = 7,
+    // Add more IDs as needed for phases 4-12
+};
+
+// Global config instance (defined in dilemma.c)
+extern via_dilemma_config_t g_via_dilemma_config;
+
 /**
  * VIA Custom Configuration EEPROM Layout
  * Total size: 32 bytes (256 bits)
