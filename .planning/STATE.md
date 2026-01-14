@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 2 of 12 (VIA Configuration Integration)
-Plan: 2 of 3 in current phase
-Status: Plan 02-02 complete, ready for 02-03
-Last activity: 2026-01-14 — Completed Plan 02-02 (VIA Scroll Divisor Configuration)
+Plan: 3 of 3 in current phase
+Status: Phase 2 complete
+Last activity: 2026-01-14 — Completed Plan 02-03 (VIA Config Application Integration)
 
 Progress: ██████████░░ 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 16 min
-- Total execution time: 1.3 hours
+- Total plans completed: 6
+- Average duration: 15 min
+- Total execution time: 1.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
-| 2. VIA Configuration Integration | 2 | 3 | 11 min |
+| 2. VIA Configuration Integration | 3 | 3 | 11 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (25 min), 01-02 (15 min), 01-03 (15 min), 02-01 (10 min), 02-02 (12 min)
+- Last 5 plans: 01-02 (15 min), 01-03 (15 min), 02-01 (10 min), 02-02 (12 min), 02-03 (10 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -54,6 +54,9 @@ Recent decisions affecting current work:
 | 2 | Apply scroll divisors at dilemma.c level, not digitizer driver | dilemma.c has VIA config access, cleaner separation |
 | 2 | Update divisors on each pointing_device_task iteration | Low overhead, ensures immediate responsiveness to mode changes |
 | 2 | Separate divisors for drag-scroll vs two-finger scroll | Different use cases need different scroll speeds |
+| 2 | Validate VIA input at set handlers, not get handlers | Fail-fast on invalid input prevents config corruption |
+| 2 | Apply VIA config immediately on save and mode changes | No reboot required, responsive UX |
+| 2 | Keep apply_via_dilemma_config() calling update_scroll_divisors() | Cleaner than separate calls, ensures consistency |
 
 ### Deferred Issues
 
@@ -70,12 +73,12 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 02-02 (VIA Scroll Divisor Configuration), ready for 02-03
+Stopped at: Completed Plan 02-03 (VIA Config Application Integration)
 Resume file: None
 
 ## Phase 2 Progress Summary
 
-**Phase 2: VIA Configuration Integration** - 2 of 3 plans complete
+**Phase 2: VIA Configuration Integration** ✅ COMPLETE
 
 **Completed Plans:**
 1. ✅ 02-01: VIA Config Helper Functions (10 min)
@@ -92,8 +95,14 @@ Resume file: None
    - Automatic divisor updates on mode changes and VIA config saves
    - Summary: `.planning/phases/02-via-config-integration/02-02-SUMMARY.md`
 
-**Remaining Plans:**
-3. 02-03: Migrate pointing device config to VIA
+3. ✅ 02-03: VIA Config Application Integration (10 min)
+   - Integrated VIA config application into VIA save handler
+   - Added VIA config application to mode change handlers (sniping/drag-scroll)
+   - Implemented DPI preset validation (0-6 range, reject > 6)
+   - Implemented custom DPI validation (clamp to 200-4000 range)
+   - VIA config changes now take effect immediately without reboot
+   - Full backward compatibility maintained
+   - Summary: `.planning/phases/02-via-config-integration/02-03-SUMMARY.md`
 
 **Key Achievements in Phase 2:**
 - ✅ Bridge created between VIA config storage and device behavior
@@ -101,11 +110,13 @@ Resume file: None
 - ✅ Boot sequence applies VIA config on startup
 - ✅ Scroll divisors now configurable via VIA (separate for drag/two-finger)
 - ✅ Automatic divisor updates on mode changes
+- ✅ VIA config changes take effect immediately (no reboot required)
+- ✅ Input validation prevents invalid config values
 - ✅ Full backward compatibility maintained
 - ✅ Old config system still works alongside VIA
 
 **Files Modified in Phase 2:**
-- `keyboards/bastardkb/dilemma/dilemma.c` (+101 lines, 5 functions)
+- `keyboards/bastardkb/dilemma/dilemma.c` (+118 lines, 5 functions)
 
 ## Phase 1 Completion Summary
 
