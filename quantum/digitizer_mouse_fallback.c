@@ -398,6 +398,56 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             }
             break;
         }
+        case Zoom: {
+            // Track both finger positions
+            if (contacts == 2) {
+                // Find the two active fingers
+                int finger_idx = 0;
+                for (int i = 0; i < DIGITIZER_FINGER_COUNT && finger_idx < 2; i++) {
+                    if (report->fingers[i].tip) {
+                        if (finger_idx == 0) {
+                            zoom_finger1_x = report->fingers[i].x;
+                            zoom_finger1_y = report->fingers[i].y;
+                        } else {
+                            zoom_finger2_x = report->fingers[i].x;
+                            zoom_finger2_y = report->fingers[i].y;
+                        }
+                        finger_idx++;
+                    }
+                }
+
+                // Calculate current distance
+                zoom_current_distance = calculate_squared_distance(zoom_finger1_x, zoom_finger1_y, zoom_finger2_x, zoom_finger2_y);
+
+                // Check if distance changed enough to trigger zoom
+                const int32_t distance_delta = zoom_current_distance - zoom_initial_distance;
+                const int32_t threshold_squared = DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD * DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD;
+
+                if (abs(distance_delta) > threshold_squared) {
+                    // Zoom gesture detected
+                    if (g_via_dilemma_config.pinch_to_zoom_enabled) {
+                        if (distance_delta > 0) {
+                            // Fingers moved apart = zoom in
+                            tap_code(DIGITIZER_ZOOM_IN_KC);
+                        } else {
+                            // Fingers moved together = zoom out
+                            tap_code(DIGITIZER_ZOOM_OUT_KC);
+                        }
+                    }
+                    state = Finished;  // Exit after triggering zoom
+                }
+
+                // Check timeout
+                if (duration > DIGITIZER_MOUSE_ZOOM_TIMEOUT) {
+                    state = None;  // Timeout, no zoom detected
+                }
+            } else if (contacts == 0) {
+                state = None;  // Fingers lifted, cancel zoom
+            } else {
+                state = MoveScroll;  // Wrong finger count, transition to scroll
+            }
+            break;
+        }
         case Finished: {
             if (contacts == 0) {
                 state = None;
