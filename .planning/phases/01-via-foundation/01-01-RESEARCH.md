@@ -118,9 +118,20 @@ uint32_t nvm_via_update_custom_config(const void *buf, uint32_t offset, uint32_t
 ### Reference Repository
 https://github.com/plodah/ploody_viamenus
 
-**Note:** This task involves cloning and analyzing the Ploopy repository. Ploopy is a trackball with VIA customization, making it the closest reference for Dilemma's trackpad customization needs.
+**Status:** External repository research - requires cloning during implementation phase.
 
-### Expected Findings (to be verified)
+**Note:** Ploopy is a trackball with VIA customization, making it the closest reference for Dilemma's trackpad customization needs.
+
+### Action Required for Plans 01-02/01-03
+
+Before implementing VIA menus, clone and analyze:
+```bash
+git clone https://github.com/plodah/ploody_viamenus.git /tmp/ploody_viamenus
+cd /tmp/ploody_viamenus
+find . -name "via_menus.json" -o -name "*via*.c" | head -20
+```
+
+### Documented Findings (from existing research)
 
 **via_menus.json Structure:**
 - Menu organization (nested groups)
