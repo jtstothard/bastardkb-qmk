@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-01-14)
 
 **Core value:** VIA customization interface - If this fails, nothing else matters. Every feature (gestures, scroll divisors, DPI controls) must be configurable through VIA without requiring firmware rebuilds.
-**Current focus:** Phase 4 — Advanced Gesture Support
+**Current focus:** Phase 6 — Smart Gesture Features
 
 ## Current Position
 
-Phase: 4 of 12 (Advanced Gesture Support)
-Plan: 5 of 6 in current phase
-Status: Plan 04-05 complete - Pinch-to-zoom gesture detection
-Last activity: 2026-01-14 — Completed Plan 04-05 (Pinch-to-Zoom Gesture Detection)
+Phase: 6 of 12 (Smart Gesture Features)
+Plan: 1 of 3 in current phase
+Status: Plan 06-01 complete - Smart gesture features research (pressure sensing, force click strategy)
+Last activity: 2026-01-14 — Completed Plan 06-01 (Smart Gesture Features Discovery)
 
-Progress: ██████████░ 90%
+Progress: ████████░░░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 18
 - Average duration: 15 min
-- Total execution time: 4.25 hours
+- Total execution time: 4.5 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: ██████████░ 90%
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
-| 4. Advanced Gesture Support | 5 | 6 | 15 min (in progress) |
+| 4. Advanced Gesture Support | 6 | 6 | 15 min |
+| 6. Smart Gesture Features | 1 | 3 | 10 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 04-04 (15 min), 04-03 (15 min), 04-02 (15 min), 04-01 (15 min), 03-04 (15 min)
+- Last 5 plans: 06-01 (10 min), 04-05 (15 min), 04-04 (15 min), 04-03 (15 min), 04-02 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 | 4 | Squared distance comparison for zoom detection (no sqrt) | Avoids floating-point, uses integer math only, reduces complexity and improves performance |
 | 4 | Opt-in pinch-to-zoom (disabled by default) | Requires threshold tuning, prevents breaking existing configs, optional feature |
 | 4 | Version bump to 1 for EEPROM breaking change | Removes swipe_keycode field, adds directional 3-finger fields, enables migration strategy |
+| 6 | Timing-based force click (NOT pressure-based) | MaxTouch T65 force sensing not enabled by default, T100 amplitude is signal strength not pressure, hardware-based detection unreliable |
+| 6 | 500ms threshold for force click (long press) | Matches macOS long press duration, 300ms hysteresis from tap (200ms) prevents ambiguous gestures |
+| 6 | Use existing Phase 3 press_and_hold_keycode for force click | No EEPROM changes required, VIA integration already complete, just wire up timing-based detection |
 
 ### Deferred Issues
 
@@ -85,8 +89,37 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 04-02 (Finger Count Tracking for 3/4-Finger Swipe Distinction)
+Stopped at: Completed Plan 06-01 (Smart Gesture Features Discovery)
 Resume file: None
+
+## Plan 06-01 Summary
+
+**Duration:** 10 minutes (3 tasks, 2 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Researched MaxTouch MXT336U pressure/force sensing capabilities
+2. ✅ Designed firmware-based force click detection strategy (timing-based 500ms long press)
+3. ✅ Documented smart zoom as already implemented in Phase 4 (Plan 04-05)
+
+**Key Achievements:**
+- Confirmed MaxTouch lacks reliable pressure sensing for gesture input (T65 not enabled by default, T100 amplitude is signal strength not pressure)
+- Designed timing-based force click detection using 500ms threshold (matches macOS long press)
+- Identified existing Phase 3 VIA config integration (press_and_hold_keycode) - no EEPROM changes required
+- Documented smart zoom as complete (already implemented in Phase 4)
+- Established clear path forward for Plan 06-02 (force click implementation)
+
+**Technical Decisions:**
+- ❌ Hardware-based pressure detection unsuitable (T65 designed for screen protection, T100 amplitude varies with finger size/moisture)
+- ✅ Use timing-based approach (500ms long press, 200ms tap, 300ms hysteresis)
+- ✅ Extend existing Down state in digitizer_mouse_fallback.c (no new state required)
+- ✅ Disable during drag-scroll or pointer sniping modes (avoid conflicts)
+
+**Files Modified:**
+- .planning/phases/06-smart-gesture-features/06-01-DISCOVERY.md (created, 420 lines)
+- .planning/phases/06-smart-gesture-features/06-01-SUMMARY.md (created, 224 lines)
+
+**Summary:** .planning/phases/06-smart-gesture-features/06-01-SUMMARY.md
 
 ## Plan 04-02 Summary
 
