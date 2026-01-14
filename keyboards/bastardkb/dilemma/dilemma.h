@@ -74,7 +74,10 @@ enum via_dilemma_value_id {
     // Pinch-to-zoom keycodes (Bytes 34-37, 16-bit each)
     id_dilemma_zoom_in_keycode = 23,
     id_dilemma_zoom_out_keycode = 24,
-    // Add more IDs as needed for phases 5-12
+    // Auto-snipe configuration (Byte 5)
+    id_dilemma_auto_snipe_enable = 25,   // Enable/disable auto-sniping on layer
+    id_dilemma_auto_snipe_layer = 26,    // Target layer for auto-sniping (0-127)
+    // Add more IDs as needed for phases 8-12
 };
 
 // Global config instance (defined in dilemma.c)
