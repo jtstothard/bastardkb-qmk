@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 7 of 12 (Auto-Sniping Toggle)
-Plan: 1 of 3 in current phase
-Status: In progress - VIA value IDs added for auto-snipe configuration
-Last activity: 2026-01-14 — Completed Plan 07-01 (Auto-Snipe VIA Value IDs)
+Plan: 2 of 3 in current phase
+Status: In progress - Layer state auto-snipe logic implemented
+Last activity: 2026-01-14 — Completed Plan 07-02 (Layer State Auto-Snipe Logic)
 
 Progress: ██████████ 95%
 
@@ -86,6 +86,33 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+## Plan 07-02 Summary
+
+**Duration:** 5 minutes (1 task, 1 atomic commit)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Implemented layer_state_set_user() with auto-snipe logic
+
+**Key Achievements:**
+- Layer-based auto-sniping functionality complete
+- Automatically enables sniping when target layer becomes active
+- Automatically disables sniping when leaving target layer
+- VIA-configurable (respects auto_snipe_enabled and auto_snipe_layer)
+- Compatible with existing keymap logic (delegates to layer_state_set_user_kb)
+- Safe implementation (checks state before enabling/disabling)
+
+**Technical Implementation:**
+- Bit mask layer checking: `state & (1 << target_layer)`
+- Uses existing sniping API: dilemma_set_pointer_sniping_enabled()
+- State before action: checks current sniping state to avoid redundant operations
+- Keymap delegation: preserves tri-layer and other keymap features
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.c (+31 lines: layer_state_set_user function)
+
+**Summary:** .planning/phases/07-auto-sniping-toggle/07-02-SUMMARY.md
 
 ## Plan 07-01 Summary
 
