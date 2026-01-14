@@ -19,7 +19,7 @@
 #pragma once
 
 /* VIA Custom Configuration */
-#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 32
+#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 64
 
 /* Pointing device configuration. */
 
