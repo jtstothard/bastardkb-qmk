@@ -12,6 +12,11 @@
 #    include "timer.h"
 #    include "action.h"
 
+// Forward declaration for VIA config (defined in dilemma.h)
+typedef struct {
+    uint8_t raw[64];
+} via_dilemma_config_t;
+
 #    ifndef DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT
 #        define DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT 200
 #    endif
@@ -94,6 +99,9 @@ bool digitizer_taps_as_clicks = false;
 // to force reporting as a mouse or as a digitizer.
 bool                  digitizer_send_mouse_reports = true;
 static report_mouse_t mouse_report                 = {};
+
+// External VIA config for gesture enable checks
+extern via_dilemma_config_t g_via_dilemma_config;
 
 static report_mouse_t digitizer_get_mouse_report(report_mouse_t _mouse_report);
 static uint16_t       digitizer_get_cpi(void);
@@ -312,36 +320,40 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             } else if (digitizer_send_mouse_reports) {
                 if (distance_x > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe right
-                    if (swipe_finger_count == 3) {
+                    if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_RIGHT_KC);  // 3-finger swipe right
-                    } else if (swipe_finger_count == 4) {
+                        state = Finished;
+                    } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
                         tap_code(DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC);  // 4-finger swipe right
+                        state = Finished;
                     }
-                    state = Finished;
                 } else if (distance_x < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe left
-                    if (swipe_finger_count == 3) {
+                    if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_LEFT_KC);  // 3-finger swipe left
-                    } else if (swipe_finger_count == 4) {
+                        state = Finished;
+                    } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
                         tap_code(DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC);  // 4-finger swipe left
+                        state = Finished;
                     }
-                    state = Finished;
                 } else if (distance_y > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe down
-                    if (swipe_finger_count == 3) {
+                    if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_DOWN_KC);  // 3-finger swipe down
-                    } else if (swipe_finger_count == 4) {
+                        state = Finished;
+                    } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
                         tap_code(DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC);  // 4-finger swipe down
+                        state = Finished;
                     }
-                    state = Finished;
                 } else if (distance_y < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe up
-                    if (swipe_finger_count == 3) {
+                    if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_UP_KC);  // 3-finger swipe up
-                    } else if (swipe_finger_count == 4) {
+                        state = Finished;
+                    } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
                         tap_code(DIGITIZER_FOUR_FINGER_SWIPE_UP_KC);  // 4-finger swipe up
+                        state = Finished;
                     }
-                    state = Finished;
                 }
             }
             break;
