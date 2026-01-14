@@ -176,7 +176,8 @@ bool dilemma_get_pointer_sniping_enabled(void) {
 
 void dilemma_set_pointer_sniping_enabled(bool enable) {
     g_dilemma_config.is_sniping_enabled = enable;
-    maybe_update_pointing_device_cpi(&g_dilemma_config);
+    apply_via_dilemma_config();                      // Apply VIA DPI settings
+    maybe_update_pointing_device_cpi(&g_dilemma_config);  // Old system
 }
 
 bool dilemma_get_pointer_dragscroll_enabled(void) {
@@ -185,8 +186,8 @@ bool dilemma_get_pointer_dragscroll_enabled(void) {
 
 void dilemma_set_pointer_dragscroll_enabled(bool enable) {
     g_dilemma_config.is_dragscroll_enabled = enable;
-    maybe_update_pointing_device_cpi(&g_dilemma_config);
-    update_scroll_divisors();
+    apply_via_dilemma_config();                      // Apply VIA DPI settings
+    maybe_update_pointing_device_cpi(&g_dilemma_config);  // Old system
 }
 
 /**
@@ -469,11 +470,20 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
             // Write value to config
             switch (*value_id) {
                 case id_dilemma_dpi_preset:
+                    if (value_data[0] > 6) {  // Preset 7 reserved
+                        *command_id = id_unhandled;
+                        break;
+                    }
                     g_via_dilemma_config.dpi_preset = value_data[0];
                     break;
                 case id_dilemma_custom_dpi:
-                    // 12-bit value across 2 bytes
-                    g_via_dilemma_config.custom_dpi = ((uint16_t)value_data[1] << 8) | value_data[0];
+                    // 16-bit value across 2 bytes
+                    {
+                        uint16_t custom_dpi = ((uint16_t)value_data[1] << 8) | value_data[0];
+                        if (custom_dpi < 200) custom_dpi = 200;
+                        if (custom_dpi > 4000) custom_dpi = 4000;
+                        g_via_dilemma_config.custom_dpi = custom_dpi;
+                    }
                     break;
                 case id_dilemma_drag_scroll_x:
                     g_via_dilemma_config.drag_scroll_x_divisor = value_data[0];
@@ -525,7 +535,8 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
 
         case id_custom_save: // 0x09
             // Persist config to EEPROM
-            write_via_dilemma_config();
+            write_via_dilemma_config();     // Persist to EEPROM
+            apply_via_dilemma_config();     // Apply to hardware
             break;
 
         default:
