@@ -673,6 +673,36 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                 case id_dilemma_pinch_to_zoom_enable:
                     g_via_dilemma_config.pinch_to_zoom_enabled = value_data[0];
                     break;
+                case id_dilemma_three_finger_swipe_left_keycode:
+                    g_via_dilemma_config.three_finger_swipe_left_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_three_finger_swipe_right_keycode:
+                    g_via_dilemma_config.three_finger_swipe_right_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_three_finger_swipe_up_keycode:
+                    g_via_dilemma_config.three_finger_swipe_up_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_three_finger_swipe_down_keycode:
+                    g_via_dilemma_config.three_finger_swipe_down_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_four_finger_swipe_left_keycode:
+                    g_via_dilemma_config.four_finger_swipe_left_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_four_finger_swipe_right_keycode:
+                    g_via_dilemma_config.four_finger_swipe_right_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_four_finger_swipe_up_keycode:
+                    g_via_dilemma_config.four_finger_swipe_up_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_four_finger_swipe_down_keycode:
+                    g_via_dilemma_config.four_finger_swipe_down_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_zoom_in_keycode:
+                    g_via_dilemma_config.zoom_in_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
+                case id_dilemma_zoom_out_keycode:
+                    g_via_dilemma_config.zoom_out_keycode = (value_data[0] << 8) | value_data[1];
+                    break;
                 // Add more setters for each value_id
                 default:
                     *command_id = id_unhandled; // Unknown value ID
