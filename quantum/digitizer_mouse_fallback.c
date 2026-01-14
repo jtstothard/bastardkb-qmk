@@ -301,7 +301,26 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                 swipe_finger_count = contacts;  // Store exact finger count
                 state = Swipe;
             } else if (duration > DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT || distance_x > DIGITIZER_MOUSE_TAP_DISTANCE || distance_y > DIGITIZER_MOUSE_TAP_DISTANCE) {
-                state = MoveScroll;
+                if (contacts == 2) {
+                    // Potential zoom gesture - capture initial finger positions
+                    int finger_idx = 0;
+                    for (int i = 0; i < DIGITIZER_FINGER_COUNT && finger_idx < 2; i++) {
+                        if (report->fingers[i].tip) {
+                            if (finger_idx == 0) {
+                                zoom_finger1_x = report->fingers[i].x;
+                                zoom_finger1_y = report->fingers[i].y;
+                            } else {
+                                zoom_finger2_x = report->fingers[i].x;
+                                zoom_finger2_y = report->fingers[i].y;
+                            }
+                            finger_idx++;
+                        }
+                    }
+                    zoom_initial_distance = calculate_squared_distance(zoom_finger1_x, zoom_finger1_y, zoom_finger2_x, zoom_finger2_y);
+                    state = Zoom;
+                } else {
+                    state = MoveScroll;
+                }
             }
             break;
         }
