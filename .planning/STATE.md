@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 6 of 12 (Smart Gesture Features)
-Plan: 1 of 3 in current phase
-Status: Plan 06-01 complete - Smart gesture features research (pressure sensing, force click strategy)
-Last activity: 2026-01-14 — Completed Plan 06-01 (Smart Gesture Features Discovery)
+Plan: 2 of 3 in current phase
+Status: Plan 06-02 complete - Force click detection implemented (timing-based 600ms long press)
+Last activity: 2026-01-14 — Completed Plan 06-02 (Force Click Detection Implementation)
 
-Progress: ████████░░░ 80%
+Progress: █████████░ 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
+- Total plans completed: 19
 - Average duration: 15 min
-- Total execution time: 4.5 hours
+- Total execution time: 4.7 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: ████████░░░ 80%
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
 | 4. Advanced Gesture Support | 6 | 6 | 15 min |
-| 6. Smart Gesture Features | 1 | 3 | 10 min (in progress) |
+| 6. Smart Gesture Features | 2 | 3 | 9 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (10 min), 04-05 (15 min), 04-04 (15 min), 04-03 (15 min), 04-02 (15 min)
-- Trend: Stable | Consistent execution
+- Last 5 plans: 06-02 (8 min), 06-01 (10 min), 04-05 (15 min), 04-04 (15 min), 04-03 (15 min)
+- Trend: Stable | Accelerating (Phase 6 ahead of schedule)
 
 ## Accumulated Context
 
@@ -71,8 +71,9 @@ Recent decisions affecting current work:
 | 4 | Opt-in pinch-to-zoom (disabled by default) | Requires threshold tuning, prevents breaking existing configs, optional feature |
 | 4 | Version bump to 1 for EEPROM breaking change | Removes swipe_keycode field, adds directional 3-finger fields, enables migration strategy |
 | 6 | Timing-based force click (NOT pressure-based) | MaxTouch T65 force sensing not enabled by default, T100 amplitude is signal strength not pressure, hardware-based detection unreliable |
-| 6 | 500ms threshold for force click (long press) | Matches macOS long press duration, 300ms hysteresis from tap (200ms) prevents ambiguous gestures |
+| 6 | 600ms threshold for force click (long press) | Provides clear separation from normal tap (<200ms), matches macOS long press behavior |
 | 6 | Use existing Phase 3 press_and_hold_keycode for force click | No EEPROM changes required, VIA integration already complete, just wire up timing-based detection |
+| 6 | Force click checks press_and_hold_enabled in Down state | Opt-in via VIA config, prevents accidental triggers, null check prevents keycode 0 execution |
 
 ### Deferred Issues
 
@@ -89,8 +90,47 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Completed Plan 06-01 (Smart Gesture Features Discovery)
+Stopped at: Completed Plan 06-02 (Force Click Detection Implementation)
 Resume file: None
+
+## Plan 06-02 Summary
+
+**Duration:** 8 minutes (3 tasks, 3 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Added DIGITIZER_FORCE_CLICK_TIMEOUT constant (600ms threshold)
+2. ✅ Implemented force click detection in Down state (timing-based, VIA-configurable)
+3. ✅ Updated gesture state documentation
+
+**Key Achievements:**
+- Force click detection functional with 600ms threshold (matches macOS long press)
+- Integrated into existing Down state (no new state machine states required)
+- VIA-configurable via press_and_hold_enabled flag and press_and_hold_keycode
+- Null check prevents executing keycode 0 (undefined)
+- Transitions to Finished state after force click (clean exit, prevents multiple triggers)
+- Backward compatible (disabled by default, opt-in)
+- Existing gesture logic preserved (tap, swipe, zoom all unaffected)
+- No EEPROM changes required (uses existing Phase 3 config)
+
+**Technical Implementation:**
+```c
+// Check for force click (long press)
+if (duration > DIGITIZER_FORCE_CLICK_TIMEOUT && g_via_dilemma_config.press_and_hold_enabled) {
+    uint16_t force_click_code = g_via_dilemma_config.press_and_hold_keycode;
+    if (force_click_code != 0) {
+        tap_code(force_click_code);
+    }
+    state = Finished;  // Exit after force click
+}
+```
+
+**Files Modified:**
+- quantum/digitizer_mouse_fallback.c (+13 lines: timeout constant, Down state detection)
+- keyboards/bastardkb/dilemma/dilemma.c (+4 lines: documentation)
+- .planning/phases/06-smart-gesture-features/06-02-SUMMARY.md (created, 375 lines)
+
+**Summary:** .planning/phases/06-smart-gesture-features/06-02-SUMMARY.md
 
 ## Plan 06-01 Summary
 
