@@ -204,6 +204,14 @@ static int   tap_count = 0;
 // Track finger count during swipe gestures (3 vs 4 fingers)
 static int swipe_finger_count = 0;
 
+// Zoom gesture tracking (pinch-to-zoom)
+static int      zoom_initial_distance = 0;    // Initial finger distance
+static int      zoom_current_distance = 0;    // Current finger distance
+static uint16_t zoom_finger1_x = 0;           // First finger X position
+static uint16_t zoom_finger1_y = 0;           // First finger Y position
+static uint16_t zoom_finger2_x = 0;           // Second finger X position
+static uint16_t zoom_finger2_y = 0;           // Second finger Y position
+
 /**
  * \brief Signals that a gesture is in progress so digitizer_update_mouse_report should be called,
  * even if no new digitizer data is available.
