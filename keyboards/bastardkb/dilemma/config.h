@@ -18,6 +18,9 @@
 
 #pragma once
 
+/* VIA Custom Configuration */
+#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 32
+
 /* Pointing device configuration. */
 
 // Enable use of pointing device on slave split.
