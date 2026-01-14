@@ -42,6 +42,79 @@ enum dilemma_keycodes {
 #        define DRG_TOG DRAGSCROLL_MODE_TOGGLE
 #    endif // !NO_DILEMMA_KEYCODES
 
+/**
+ * VIA Custom Configuration EEPROM Layout
+ * Total size: 32 bytes (256 bits)
+ * Version: 1 (increment when structure changes incompatibly)
+ *
+ * Migration strategy:
+ * - Load from EEPROM, check config_version field
+ * - If version mismatch, reset to defaults and update version
+ * - Reserved fields must be zero-initialized
+ *
+ * This struct packs 30+ settings into 32 bytes using efficient bit-field layout.
+ * Phase 2 will implement the persistence layer for reading/writing these settings.
+ */
+typedef union {
+    uint8_t raw[32];
+    struct {
+        // Byte 0: DPI settings
+        uint8_t dpi_preset : 3;           // 0-7 (5 presets + custom + 2 expansion)
+        uint8_t reserved_0 : 5;           // Future DPI features
+
+        // Bytes 1-2: Custom DPI value (12 bits) + reserved
+        uint16_t custom_dpi : 12;         // 0-4095 (Azoteq range)
+        uint16_t reserved_1 : 4;          // Future DPI precision
+
+        // Byte 3: Drag scroll divisors (4 bits each)
+        uint8_t drag_scroll_x_divisor : 4; // 0-15
+        uint8_t drag_scroll_y_divisor : 4; // 0-15
+
+        // Byte 4: Two-finger scroll divisors
+        uint8_t two_finger_x_divisor : 4;  // 0-15
+        uint8_t two_finger_y_divisor : 4;  // 0-15
+
+        // Byte 5: Auto-sniping configuration
+        uint8_t auto_snipe_enabled : 1;    // Enable/disable
+        uint8_t auto_snipe_layer : 7;      // Target layer (0-127)
+
+        // Byte 6: Basic gesture enables
+        uint8_t tap_to_click_enabled : 1;   // Single-finger tap
+        uint8_t two_finger_tap_enabled : 1; // Right-click equivalent
+        uint8_t two_finger_scroll_enabled : 1; // Scroll gesture
+        uint8_t press_and_hold_enabled : 1;  // Long-press selection
+        uint8_t reserved_6 : 4;            // Future gesture enables
+
+        // Byte 7: Advanced gesture enables
+        uint8_t three_finger_swipe_enabled : 1; // App switcher
+        uint8_t four_finger_swipe_enabled : 1;  // Desktop spaces
+        uint8_t pinch_to_zoom_enabled : 1;      // Smart zoom
+        uint8_t reserved_7 : 5;                // Future advanced gestures
+
+        // Bytes 8-19: Gesture-to-keycode mappings (12 bytes)
+        // Each gesture maps to a 16-bit keycode
+        uint16_t tap_to_click_keycode;         // Byte 8-9
+        uint16_t two_finger_tap_keycode;       // Byte 10-11
+        uint16_t two_finger_scroll_up_keycode; // Byte 12-13
+        uint16_t two_finger_scroll_down_keycode; // Byte 14-15
+        uint16_t press_and_hold_keycode;       // Byte 16-17
+        uint16_t swipe_keycode;                // Byte 18-19
+
+        // Byte 20: Smart gesture features
+        uint8_t tap_pressure_threshold : 4;    // 0-15 (sensitivity)
+        uint8_t force_click_enabled : 1;       // Long-press force click
+        uint8_t smart_zoom_enabled : 1;        // Pinch-to-zoom enhancement
+        uint8_t reserved_20 : 2;              // Future smart features
+
+        // Bytes 21-30: Reserved for future expansion (10 bytes)
+        uint8_t reserved_21[10];              // Phase 10+ features
+
+        // Byte 31: Versioning and final reserved
+        uint8_t config_version : 4;           // EEPROM format version
+        uint8_t reserved_31 : 4;             // Future versioning needs
+    } __attribute__((packed));
+} via_dilemma_config_t;
+
 /** \brief Return the current DPI value for the pointer's default mode. */
 uint16_t dilemma_get_pointer_default_dpi(void);
 
