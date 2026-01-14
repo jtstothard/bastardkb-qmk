@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-01-14)
 ## Current Position
 
 Phase: 4 of 12 (Advanced Gesture Support)
-Plan: 2 of 6 in current phase
-Status: Plan 04-02 complete - Finger count tracking implemented
-Last activity: 2026-01-14 — Completed Plan 04-02 (Finger Count Tracking for 3/4-Finger Swipe Distinction)
+Plan: 4 of 6 in current phase
+Status: Plan 04-04 complete - VIA command handlers for advanced gestures
+Last activity: 2026-01-14 — Completed Plan 04-04 (VIA Command Handlers for Advanced Gesture Support)
 
-Progress: █████████░░ 78%
+Progress: ██████████░ 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 16
 - Average duration: 15 min
-- Total execution time: 2.9 hours
+- Total execution time: 4.0 hours
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: █████████░░ 78%
 | 1. VIA Integration Foundation | 3 | 3 | 18 min |
 | 2. VIA Configuration Integration | 3 | 3 | 11 min |
 | 3. Basic Gesture Enablement | 4 | 4 | 15 min |
-| 4. Advanced Gesture Support | 2 | 6 | 15 min (in progress) |
+| 4. Advanced Gesture Support | 4 | 6 | 15 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 03-04 (15 min), 04-01 (15 min), 04-02 (15 min)
+- Last 5 plans: 04-04 (15 min), 04-03 (15 min), 04-02 (15 min), 04-01 (15 min), 03-04 (15 min)
 - Trend: Stable | Consistent execution
 
 ## Accumulated Context
@@ -137,6 +137,39 @@ Resume file: None
 - .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md (created)
 
 **Summary:** .planning/phases/04-advanced-gesture-support/04-01-SUMMARY.md
+
+## Plan 04-04 Summary
+
+**Duration:** 15 minutes (9 tasks, 9 atomic commits)
+**Status:** ✅ COMPLETE
+
+**Completed Tasks:**
+1. ✅ Audited and optimized EEPROM layout (removed swipe_keycode, added 10 new keycode fields)
+2. ✅ Increased VIA EEPROM custom config size to 64 bytes
+3. ✅ Added VIA set handlers for 3 advanced gesture enables
+4. ✅ Added VIA get handlers for 3 advanced gesture enables
+5. ✅ Added VIA set handlers for 10 advanced gesture keycodes
+6. ✅ Added VIA get handlers for 10 advanced gesture keycodes
+7. ✅ Extended gesture filtering for advanced gestures
+8. ✅ Integrated VIA config checks into digitizer swipe logic
+9. ✅ Initialized advanced gesture defaults
+
+**Key Achievements:**
+- Complete VIA read/write access for 3 advanced gesture enables and 10 keycodes
+- Gesture filtering extended to cover 3-finger swipes and pinch-to-zoom
+- Firmware checks VIA config before executing swipe keycodes
+- Sensible defaults match macOS behavior (3-finger ON, 4-finger OFF, zoom OFF)
+- Backward compatible (3-finger swipes enabled by default)
+- EEPROM layout optimized (38 bytes used, 26 bytes reserved)
+- Code follows Phase 3 patterns
+
+**Files Modified:**
+- keyboards/bastardkb/dilemma/dilemma.h (+25 -10 lines: EEPROM struct optimization)
+- keyboards/bastardkb/dilemma/config.h (+1 -1 line: VIA_EEPROM_CUSTOM_CONFIG_SIZE = 64)
+- keyboards/bastardkb/dilemma/dilemma.c (+126 -3 lines: handlers, filtering, defaults)
+- quantum/digitizer_mouse_fallback.c (+27 -12 lines: VIA config checks in swipe logic)
+
+**Summary:** .planning/phases/04-advanced-gesture-support/04-04-SUMMARY.md
 
 ## Plan 04-03 Summary
 
