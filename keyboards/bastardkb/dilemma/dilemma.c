@@ -349,6 +349,39 @@ void eeconfig_init_kb(void) {
 
 via_dilemma_config_t g_via_dilemma_config = {0};
 
+/**
+ * \brief Map VIA DPI preset to actual DPI value.
+ *
+ * Converts a 3-bit preset value (0-7) to a concrete DPI number:
+ * - Presets 0-5: Standard DPI steps (200, 400, 600, 800, 1000, 1200)
+ * - Preset 6: Custom DPI value (read from custom_dpi field)
+ * - Preset 7: Reserved for future expansion
+ *
+ * \param preset The DPI preset value (0-7).
+ * \return The corresponding DPI value, or 0 for invalid presets.
+ */
+static uint16_t get_dpi_from_preset(uint8_t preset) {
+    switch (preset) {
+        case 0:
+            return 200;
+        case 1:
+            return 400;
+        case 2:
+            return 600;
+        case 3:
+            return 800;
+        case 4:
+            return 1000;
+        case 5:
+            return 1200;
+        case 6:
+            return g_via_dilemma_config.custom_dpi;
+        case 7:
+        default:
+            return 0; // Reserved/invalid
+    }
+}
+
 // Read custom config from EEPROM
 static void read_via_dilemma_config(void) {
     nvm_via_read_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
