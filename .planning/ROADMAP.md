@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: VIA Integration Foundation** - Setup VIA custom command infrastructure and EEPROM layout
 - [x] **Phase 2: VIA Configuration Integration** - Bridge VIA config to device behavior, DPI and scroll divisors
-- [ ] **Phase 3: Basic Gesture Enablement** - Enable existing Azoteq gestures (tap, two-finger tap, scroll)
+- [x] **Phase 3: Basic Gesture Enablement** - Enable existing Azoteq gestures (tap, two-finger tap, scroll)
 - [ ] **Phase 4: Advanced Gesture Support** - Three-finger swipes, four-finger swipes, pinch-to-zoom
 - [ ] **Phase 5: Gesture-to-Keycode Mapping** - VIA-configurable gesture actions mapping
 - [ ] **Phase 6: Smart Gesture Features** - Tap-to-click with pressure, force click, smart zoom
@@ -60,10 +60,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: Research Azoteq gesture enable flags and configuration registers
-- [ ] 03-02: Enable single-tap, two-finger-tap, scroll, press-and-hold in driver
-- [ ] 03-03: Add gesture enable toggles to EEPROM struct
-- [ ] 03-04: Implement VIA commands for gesture enable/disable
+- [x] 03-01: Research Azoteq gesture enable flags and configuration registers
+- [x] 03-02: Enable single-tap, two-finger-tap, scroll, press-and-hold in driver
+- [x] 03-03: Add gesture enable toggles to EEPROM struct
+- [x] 03-04: Implement VIA commands for gesture enable/disable
 
 ### Phase 4: Advanced Gesture Support
 **Goal**: Three-finger swipes (app switcher, expose), four-finger swipes (spaces, show desktop), pinch-to-zoom
@@ -159,7 +159,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. VIA Integration Foundation | 3/3 | Complete | 2026-01-14 |
 | 2. VIA Configuration Integration | 3/3 | Complete | 2026-01-14 |
-| 3. Basic Gesture Enablement | 0/4 | Not started | - |
+| 3. Basic Gesture Enablement | 4/4 | Complete | 2026-01-14 |
 | 4. Advanced Gesture Support | 0/5 | Not started | - |
 | 5. Gesture-to-Keycode Mapping | 0/3 | Not started | - |
 | 6. Smart Gesture Features | 0/4 | Not started | - |
