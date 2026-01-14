@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: VIA Integration Foundation** - Setup VIA custom command infrastructure and EEPROM layout
 - [x] **Phase 2: VIA Configuration Integration** - Bridge VIA config to device behavior, DPI and scroll divisors
 - [x] **Phase 3: Basic Gesture Enablement** - Enable existing Azoteq gestures (tap, two-finger tap, scroll)
-- [ ] **Phase 4: Advanced Gesture Support** - Three-finger swipes, four-finger swipes, pinch-to-zoom
+- [x] **Phase 4: Advanced Gesture Support** - Three-finger swipes, four-finger swipes, pinch-to-zoom
 - [ ] **Phase 5: Gesture-to-Keycode Mapping** - VIA-configurable gesture actions mapping
 - [ ] **Phase 6: Smart Gesture Features** - Tap-to-click with pressure, force click, smart zoom
 - [ ] **Phase 7: Auto-Sniping Toggle** - VIA-configurable layer-based sniping enable/disable
@@ -73,11 +73,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 04-01: Research Azoteq 3/4-finger swipe and zoom gesture detection
-- [ ] 04-02: Implement swipe gesture state machine (3-finger X/Y, 4-finger X/Y)
-- [ ] 04-03: Implement pinch-to-zoom gesture detection
-- [ ] 04-04: Add advanced gesture enables and mappings to EEPROM
-- [ ] 04-05: Implement VIA commands for advanced gesture configuration
+- [x] 04-01: Research Azoteq 3/4-finger swipe and zoom gesture detection
+- [x] 04-02: Implement swipe gesture state machine (3-finger X/Y, 4-finger X/Y)
+- [x] 04-03: Implement pinch-to-zoom gesture detection
+- [x] 04-04: Add advanced gesture enables and mappings to EEPROM
+- [x] 04-05: Implement VIA commands for advanced gesture configuration
 
 ### Phase 5: Gesture-to-Keycode Mapping
 **Goal**: VIA-configurable mapping of gestures to keycodes (e.g., two-finger tap → KC_BTN2, swipe → KC_TAB)
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. VIA Integration Foundation | 3/3 | Complete | 2026-01-14 |
 | 2. VIA Configuration Integration | 3/3 | Complete | 2026-01-14 |
 | 3. Basic Gesture Enablement | 4/4 | Complete | 2026-01-14 |
-| 4. Advanced Gesture Support | 0/5 | Not started | - |
+| 4. Advanced Gesture Support | 5/5 | Complete | 2026-01-14 |
 | 5. Gesture-to-Keycode Mapping | 0/3 | Not started | - |
 | 6. Smart Gesture Features | 0/4 | Not started | - |
 | 7. Auto-Sniping Toggle | 0/3 | Not started | - |
