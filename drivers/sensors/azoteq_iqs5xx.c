@@ -5,6 +5,7 @@
 #include "azoteq_iqs5xx.h"
 #include "pointing_device_internal.h"
 #include "wait.h"
+#include "debug.h"
 
 #ifndef AZOTEQ_IQS5XX_ADDRESS
 #    define AZOTEQ_IQS5XX_ADDRESS (0x74 << 1)
@@ -132,7 +133,7 @@ i2c_status_t azoteq_iqs5xx_get_base_data(azoteq_iqs5xx_base_data_t *base_data) {
 
 i2c_status_t azoteq_iqs5xx_get_report_rate(azoteq_iqs5xx_report_rate_t *report_rate, azoteq_iqs5xx_charging_modes_t mode, bool end_session) {
     if (mode > AZOTEQ_IQS5XX_LP2) {
-        pd_dprintf("IQS5XX - Invalid mode for get report rate.\n");
+        dprintf("IQS5XX - Invalid mode for get report rate.\n");
         return I2C_STATUS_ERROR;
     }
     uint16_t     selected_reg = AZOTEQ_IQS5XX_REG_REPORT_RATE_ACTIVE + (2 * mode);
@@ -145,7 +146,7 @@ i2c_status_t azoteq_iqs5xx_get_report_rate(azoteq_iqs5xx_report_rate_t *report_r
 
 i2c_status_t azoteq_iqs5xx_set_report_rate(uint16_t report_rate_ms, azoteq_iqs5xx_charging_modes_t mode, bool end_session) {
     if (mode > AZOTEQ_IQS5XX_LP2) {
-        pd_dprintf("IQS5XX - Invalid mode for set report rate.\n");
+        dprintf("IQS5XX - Invalid mode for set report rate.\n");
         return I2C_STATUS_ERROR;
     }
     uint16_t                    selected_reg = AZOTEQ_IQS5XX_REG_REPORT_RATE_ACTIVE + (2 * mode);
@@ -195,7 +196,7 @@ i2c_status_t azoteq_iqs5xx_set_event_mode(bool enabled, bool end_session) {
 i2c_status_t azoteq_iqs5xx_set_gesture_config(bool end_session) {
     azoteq_iqs5xx_gesture_config_t config = {0};
     i2c_status_t                   status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_SINGLE_FINGER_GESTURES, (uint8_t *)&config, sizeof(azoteq_iqs5xx_gesture_config_t), AZOTEQ_IQS5XX_TIMEOUT_MS);
-    pd_dprintf("azo scroll: %d\n", config.multi_finger_gestures.scroll);
+    dprintf("azo scroll: %d\n", config.multi_finger_gestures.scroll);
     if (status == I2C_STATUS_SUCCESS) {
         config.single_finger_gestures.single_tap     = AZOTEQ_IQS5XX_TAP_ENABLE;
         config.single_finger_gestures.press_and_hold = AZOTEQ_IQS5XX_PRESS_AND_HOLD_ENABLE;
@@ -262,7 +263,7 @@ i2c_status_t azoteq_iqs5xx_reset_suspend(bool reset, bool suspend, bool end_sess
 
 void azoteq_iqs5xx_set_cpi(uint16_t cpi) {
     if (azoteq_iqs5xx_product_number != AZOTEQ_IQS5XX_UNKNOWN) {
-        pd_dprintf("IQS5XX - set_cpi called with cpi=%d\n", cpi);
+        dprintf("IQS5XX - set_cpi called with cpi=%d\n", cpi);
         azoteq_iqs5xx_resolution_t resolution = {0};
         resolution.x_resolution               = AZOTEQ_IQS5XX_SWAP_H_L_BYTES(MIN(azoteq_iqs5xx_device_resolution_t.resolution_x, AZOTEQ_IQS5XX_INCH_TO_RESOLUTION_X(cpi)));
         resolution.y_resolution               = AZOTEQ_IQS5XX_SWAP_H_L_BYTES(MIN(azoteq_iqs5xx_device_resolution_t.resolution_y, AZOTEQ_IQS5XX_INCH_TO_RESOLUTION_Y(cpi)));
@@ -286,7 +287,7 @@ uint16_t azoteq_iqs5xx_get_product(void) {
     if (status == I2C_STATUS_SUCCESS) {
         azoteq_iqs5xx_product_number = AZOTEQ_IQS5XX_SWAP_H_L_BYTES(azoteq_iqs5xx_product_number);
     }
-    pd_dprintf("AZOTEQ: Product number %u\n", azoteq_iqs5xx_product_number);
+    dprintf("AZOTEQ: Product number %u\n", azoteq_iqs5xx_product_number);
     return azoteq_iqs5xx_product_number;
 }
 
@@ -359,7 +360,7 @@ report_mouse_t azoteq_iqs5xx_get_report(report_mouse_t mouse_report) {
     static uint32_t call_count = 0;
     call_count++;
 
-    pd_dprintf("IQS5XX [%lu] get_report: current_cpi=%d, last_cpi=%d\n", call_count, current_cpi, last_cpi);
+    dprintf("IQS5XX [%lu] get_report: current_cpi=%d, last_cpi=%d\n", call_count, current_cpi, last_cpi);
 
     if (azoteq_iqs5xx_init_status == I2C_STATUS_SUCCESS) {
         azoteq_iqs5xx_base_data_t base_data       = {0};
@@ -367,76 +368,76 @@ report_mouse_t azoteq_iqs5xx_get_report(report_mouse_t mouse_report) {
         bool                      ignore_movement = false;
 
         if (status == I2C_STATUS_SUCCESS) {
-            pd_dprintf("IQS5XX [%lu] number_of_fingers=%d, ignore_movement=%d\n", call_count, base_data.number_of_fingers, ignore_movement);
+            dprintf("IQS5XX [%lu] number_of_fingers=%d, ignore_movement=%d\n", call_count, base_data.number_of_fingers, ignore_movement);
 
             // Get raw x/y values for logging
             int16_t raw_x = AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.x.h, base_data.x.l);
             int16_t raw_y = AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.y.h, base_data.y.l);
-            pd_dprintf("IQS5XX [%lu] raw x=%d, y=%d\n", call_count, raw_x, raw_y);
+            dprintf("IQS5XX [%lu] raw x=%d, y=%d\n", call_count, raw_x, raw_y);
 
 #ifdef POINTING_DEVICE_DEBUG
             if (base_data.previous_cycle_time > AZOTEQ_IQS5XX_REPORT_RATE) {
-                pd_dprintf("IQS5XX - previous cycle time missed, took: %dms\n", base_data.previous_cycle_time);
+                dprintf("IQS5XX - previous cycle time missed, took: %dms\n", base_data.previous_cycle_time);
             }
 #endif
             if (base_data.gesture_events_0.single_tap || base_data.gesture_events_0.press_and_hold) {
-                pd_dprintf("IQS5XX - Single tap/hold.\n");
+                dprintf("IQS5XX - Single tap/hold.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON1);
             } else if (base_data.gesture_events_1.two_finger_tap) {
-                pd_dprintf("IQS5XX - Two finger tap.\n");
+                dprintf("IQS5XX - Two finger tap.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON2);
             } else if (base_data.gesture_events_0.swipe_x_neg) {
-                pd_dprintf("IQS5XX - X-.\n");
+                dprintf("IQS5XX - X-.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON4);
                 ignore_movement     = true;
             } else if (base_data.gesture_events_0.swipe_x_pos) {
-                pd_dprintf("IQS5XX - X+.\n");
+                dprintf("IQS5XX - X+.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON5);
                 ignore_movement     = true;
             } else if (base_data.gesture_events_0.swipe_y_neg) {
-                pd_dprintf("IQS5XX - Y-.\n");
+                dprintf("IQS5XX - Y-.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON6);
                 ignore_movement     = true;
             } else if (base_data.gesture_events_0.swipe_y_pos) {
-                pd_dprintf("IQS5XX - Y+.\n");
+                dprintf("IQS5XX - Y+.\n");
                 temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON3);
                 ignore_movement     = true;
             } else if (base_data.gesture_events_1.zoom) {
                 if (AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.x.h, base_data.x.l) < 0) {
-                    pd_dprintf("IQS5XX - Zoom out.\n");
+                    dprintf("IQS5XX - Zoom out.\n");
                     temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON7);
                 } else if (AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.x.h, base_data.x.l) > 0) {
-                    pd_dprintf("IQS5XX - Zoom in.\n");
+                    dprintf("IQS5XX - Zoom in.\n");
                     temp_report.buttons = pointing_device_handle_buttons(temp_report.buttons, true, POINTING_DEVICE_BUTTON8);
                 }
             } else if (base_data.gesture_events_1.scroll) {
-                pd_dprintf("IQS5XX - Scroll.\n");
+                dprintf("IQS5XX - Scroll.\n");
                 temp_report.h = CONSTRAIN_HID(AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.x.h, base_data.x.l));
                 temp_report.v = CONSTRAIN_HID(AZOTEQ_IQS5XX_COMBINE_H_L_BYTES(base_data.y.h, base_data.y.l));
             }
             // Only set x/y values if CPI hasn't changed (prevents cursor jump from stale deltas at old scale)
             if (last_cpi && current_cpi == last_cpi && base_data.number_of_fingers == 1 && !ignore_movement) {
-                pd_dprintf("IQS5XX [%lu] CPI MATCH: setting x=%d, y=%d\n", call_count, raw_x, raw_y);
+                dprintf("IQS5XX [%lu] CPI MATCH: setting x=%d, y=%d\n", call_count, raw_x, raw_y);
                 temp_report.x = CONSTRAIN_HID_XY(raw_x);
                 temp_report.y = CONSTRAIN_HID_XY(raw_y);
             } else if (last_cpi && current_cpi != last_cpi && base_data.number_of_fingers == 1 && !ignore_movement) {
                 // CPI changed - log the stale data we're skipping
-                pd_dprintf("IQS5XX [%lu] CPI MISMATCH: last=%d, current=%d, SKIP x=%d, y=%d\n", call_count, last_cpi, current_cpi, raw_x, raw_y);
+                dprintf("IQS5XX [%lu] CPI MISMATCH: last=%d, current=%d, SKIP x=%d, y=%d\n", call_count, last_cpi, current_cpi, raw_x, raw_y);
             } else if (!last_cpi && base_data.number_of_fingers == 1 && !ignore_movement) {
-                pd_dprintf("IQS5XX [%lu] FIRST CALL (no last_cpi): setting x=%d, y=%d\n", call_count, raw_x, raw_y);
+                dprintf("IQS5XX [%lu] FIRST CALL (no last_cpi): setting x=%d, y=%d\n", call_count, raw_x, raw_y);
                 temp_report.x = CONSTRAIN_HID_XY(raw_x);
                 temp_report.y = CONSTRAIN_HID_XY(raw_y);
             } else {
-                pd_dprintf("IQS5XX [%lu] SKIPPED: last_cpi=%d, cpi_match=%d, fingers=%d, ignore=%d\n",
+                dprintf("IQS5XX [%lu] SKIPPED: last_cpi=%d, cpi_match=%d, fingers=%d, ignore=%d\n",
                     call_count, last_cpi, (current_cpi == last_cpi), base_data.number_of_fingers, ignore_movement);
             }
             last_cpi = current_cpi;
 
         } else {
-            pd_dprintf("IQS5XX - get report failed, i2c status: %d \n", status);
+            dprintf("IQS5XX - get report failed, i2c status: %d \n", status);
         }
     } else {
-        pd_dprintf("IQS5XX - Init failed, i2c status: %d \n", azoteq_iqs5xx_init_status);
+        dprintf("IQS5XX - Init failed, i2c status: %d \n", azoteq_iqs5xx_init_status);
     }
 
     return temp_report;
