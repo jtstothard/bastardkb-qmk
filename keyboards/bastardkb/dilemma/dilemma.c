@@ -521,6 +521,9 @@ void matrix_init_kb(void) {
     // Initialize VIA custom config
     read_via_dilemma_config();
 
+    // Apply VIA config settings to pointing device
+    apply_via_dilemma_config();
+
     matrix_init_user();
 }
 #endif // POINTING_DEVICE_ENABLE
