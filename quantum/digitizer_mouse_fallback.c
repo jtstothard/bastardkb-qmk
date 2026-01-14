@@ -234,6 +234,7 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                 state              = Tapped;
                 contact_start_time = timer_read32();
             } else if (contacts >= 3) {
+                swipe_finger_count = contacts;  // Store exact finger count
                 state = Swipe;
             } else if (duration > DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT || distance_x > DIGITIZER_MOUSE_TAP_DISTANCE || distance_y > DIGITIZER_MOUSE_TAP_DISTANCE) {
                 state = MoveScroll;
@@ -251,7 +252,8 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                 }
                 last_x = x;
                 last_y = y;
-            } else if (contacts == 3 && duration < DIGITIZER_MOUSE_SWIPE_TIMEOUT) {
+            } else if (contacts >= 3 && duration < DIGITIZER_MOUSE_SWIPE_TIMEOUT) {
+                swipe_finger_count = contacts;  // Store exact finger count
                 state = Swipe;
             } else {
                 static int carry_h = 0;
