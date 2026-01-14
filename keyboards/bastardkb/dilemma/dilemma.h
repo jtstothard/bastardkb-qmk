@@ -90,11 +90,11 @@ extern via_dilemma_config_t g_via_dilemma_config;
  * - If version mismatch, reset to defaults and update version
  * - Reserved fields must be zero-initialized
  *
- * This struct packs 30+ settings into 32 bytes using efficient bit-field layout.
+ * This struct packs 40+ settings into 64 bytes using efficient bit-field layout.
  * Phase 2 will implement the persistence layer for reading/writing these settings.
  */
 typedef union {
-    uint8_t raw[32];
+    uint8_t raw[64];
     struct {
         // Byte 0: DPI settings
         uint8_t dpi_preset : 3;           // 0-7 (5 presets + custom + 2 expansion)
@@ -129,27 +129,42 @@ typedef union {
         uint8_t pinch_to_zoom_enabled : 1;      // Smart zoom
         uint8_t reserved_7 : 5;                // Future advanced gestures
 
-        // Bytes 8-19: Gesture-to-keycode mappings (12 bytes)
+        // Bytes 8-19: Basic gesture-to-keycode mappings (12 bytes)
         // Each gesture maps to a 16-bit keycode
         uint16_t tap_to_click_keycode;         // Byte 8-9
         uint16_t two_finger_tap_keycode;       // Byte 10-11
         uint16_t two_finger_scroll_up_keycode; // Byte 12-13
         uint16_t two_finger_scroll_down_keycode; // Byte 14-15
         uint16_t press_and_hold_keycode;       // Byte 16-17
-        uint16_t swipe_keycode;                // Byte 18-19
 
-        // Byte 20: Smart gesture features
+        // Bytes 18-25: 3-finger swipe keycodes (8 bytes, 16-bit each)
+        uint16_t three_finger_swipe_left_keycode;   // Byte 18-19
+        uint16_t three_finger_swipe_right_keycode;  // Byte 20-21
+        uint16_t three_finger_swipe_up_keycode;     // Byte 22-23
+        uint16_t three_finger_swipe_down_keycode;   // Byte 24-25
+
+        // Bytes 26-33: 4-finger swipe keycodes (8 bytes, 16-bit each)
+        uint16_t four_finger_swipe_left_keycode;    // Byte 26-27
+        uint16_t four_finger_swipe_right_keycode;   // Byte 28-29
+        uint16_t four_finger_swipe_up_keycode;      // Byte 30-31
+        uint16_t four_finger_swipe_down_keycode;    // Byte 32-33
+
+        // Bytes 34-37: Pinch-to-zoom keycodes (4 bytes, 16-bit each)
+        uint16_t zoom_in_keycode;   // Byte 34-35
+        uint16_t zoom_out_keycode;  // Byte 36-37
+
+        // Bytes 38-39: Smart gesture features
         uint8_t tap_pressure_threshold : 4;    // 0-15 (sensitivity)
         uint8_t force_click_enabled : 1;       // Long-press force click
         uint8_t smart_zoom_enabled : 1;        // Pinch-to-zoom enhancement
-        uint8_t reserved_20 : 2;              // Future smart features
+        uint8_t reserved_38 : 2;              // Future smart features
 
-        // Bytes 21-30: Reserved for future expansion (10 bytes)
-        uint8_t reserved_21[10];              // Phase 10+ features
+        // Bytes 40-61: Reserved for future expansion (22 bytes)
+        uint8_t reserved_40[22];              // Phase 10+ features
 
-        // Byte 31: Versioning and final reserved
+        // Bytes 62-63: Versioning and final reserved
         uint8_t config_version : 4;           // EEPROM format version
-        uint8_t reserved_31 : 4;             // Future versioning needs
+        uint8_t reserved_62 : 4;             // Future versioning needs
     } __attribute__((packed));
 } via_dilemma_config_t;
 
