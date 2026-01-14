@@ -564,6 +564,9 @@ static void apply_via_dilemma_config(void) {
     }
     // Update scroll divisors after VIA config changes
     update_scroll_divisors();
+    // Gesture filtering automatically uses updated VIA config
+    // No explicit call needed - filter_gestures_by_via_config()
+    // runs on each pointing_device_task iteration
 }
 
 // Read custom config from EEPROM
