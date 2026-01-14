@@ -66,6 +66,11 @@ enum via_dilemma_value_id {
     id_dilemma_three_finger_swipe_right_keycode = 16,
     id_dilemma_three_finger_swipe_up_keycode = 17,
     id_dilemma_three_finger_swipe_down_keycode = 18,
+    // 4-finger swipe keycodes (Bytes 26-33, 16-bit each)
+    id_dilemma_four_finger_swipe_left_keycode = 19,
+    id_dilemma_four_finger_swipe_right_keycode = 20,
+    id_dilemma_four_finger_swipe_up_keycode = 21,
+    id_dilemma_four_finger_swipe_down_keycode = 22,
     // Add more IDs as needed for phases 5-12
 };
 
