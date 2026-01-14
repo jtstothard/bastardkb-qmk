@@ -587,4 +587,438 @@ pinch_to_zoom_enabled = 0;       // Disabled by default (opt-in)
 
 ---
 
-**Next Section:** Pinch-to-Zoom Detection Algorithm
+## Pinch-to-Zoom Gesture Detection Algorithm
+
+### 1. Gesture Pattern Recognition
+
+**Pinch-to-Zoom Gesture:**
+- Two fingers start on surface at distance D1
+- Fingers move apart (spread) → Zoom In
+- Fingers move together (pinch) → Zoom Out
+- Distance change exceeds threshold → Trigger zoom keycode
+
+**Physical Model:**
+```
+Initial state:  Two fingers down, distance = D1
+Intermediate:   Fingers move, distance = D2
+Final state:    |D2 - D1| > threshold → Zoom gesture detected
+```
+
+**Mathematical Representation:**
+```
+Distance formula: D = sqrt((x2-x1)² + (y2-y1)²)
+
+Zoom In:  D2 > D1 + threshold  (fingers spreading apart)
+Zoom Out: D2 < D1 - threshold  (fingers pinching together)
+```
+
+---
+
+### 2. Implementation Requirements
+
+#### 2.1 Track Two Finger Positions
+
+**Finger Data Structure (digitizer.h):**
+```c
+typedef struct {
+    uint16_t x;  // X coordinate (0-4095)
+    uint16_t y;  // Y coordinate (0-4095)
+    bool tip;    // Finger touch state
+} report_digitizer_finger_t;
+```
+
+**Access Pattern:**
+```c
+// Finger 0 position
+uint16_t f0_x = report->fingers[0].x;
+uint16_t f0_y = report->fingers[0].y;
+
+// Finger 1 position
+uint16_t f1_x = report->fingers[1].x;
+uint16_t f1_y = report->fingers[1].y;
+```
+
+**Assumptions:**
+- Fingers sorted by ID (0 = first finger down, 1 = second finger down)
+- Both fingers have `tip == true` when gesture active
+- Coordinates in device units (0-4095 for MaxTouch MXT336U)
+
+#### 2.2 Calculate Distance Between Fingers
+
+**Standard Euclidean Distance:**
+```c
+static uint16_t calculate_distance(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    int32_t dx = (int32_t)x1 - (int32_t)x0;
+    int32_t dy = (int32_t)y1 - (int32_t)y0;
+
+    // Use fixed-point math to avoid floating point
+    // Distance = sqrt(dx² + dy²)
+    // For QMK/embedded: use squared distance or integer approximation
+
+    uint32_t distance_squared = (uint32_t)(dx * dx) + (uint32_t)(dy * dy);
+
+    // Integer square root (optional, or compare squared values)
+    return isqrt(distance_squared);  // Need to implement isqrt()
+}
+```
+
+**QMK Math Constraints:**
+- QMK firmware typically avoids floating-point operations
+- No `sqrt()` in standard QMK math library
+- **Solution 1:** Use squared distance comparison (no sqrt needed)
+- **Solution 2:** Implement integer square root (fast approximation)
+
+**Squared Distance Comparison (Recommended):**
+```c
+// Instead of: if (distance > threshold)
+// Use:        if (distance_squared > threshold_squared)
+
+#define ZOOM_THRESHOLD 500  // In pixels
+#define ZOOM_THRESHOLD_SQUARED (ZOOM_THRESHOLD * ZOOM_THRESHOLD)  // 250000
+
+// Compare squared distances (no sqrt needed)
+if (distance_squared > ZOOM_THRESHOLD_SQUARED) {
+    // Zoom gesture detected
+}
+```
+
+#### 2.3 Store Initial Distance
+
+**State Variables:**
+```c
+static uint16_t zoom_initial_distance = 0;   // Distance at gesture start
+static uint32_t zoom_start_time = 0;         // Timer for gesture duration
+static bool zoom_gesture_active = false;     // Gesture in progress
+```
+
+**Gesture Entry Logic:**
+```c
+case Down: {
+    // ... existing code ...
+
+    // NEW: Detect zoom gesture entry
+    if (contacts == 2 && !zoom_gesture_active) {
+        zoom_initial_distance = calculate_distance(
+            report->fingers[0].x, report->fingers[0].y,
+            report->fingers[1].x, report->fingers[1].y
+        );
+        zoom_start_time = timer_read32();
+        zoom_gesture_active = true;
+    }
+
+    // ... existing code ...
+}
+```
+
+#### 2.4 Monitor Distance Changes
+
+**Zoom Detection Logic:**
+```c
+case MoveScroll: {
+    // ... existing code ...
+
+    // NEW: Check for zoom gesture
+    if (contacts == 2 && zoom_gesture_active) {
+        uint16_t current_distance = calculate_distance(
+            report->fingers[0].x, report->fingers[0].y,
+            report->fingers[1].x, report->fingers[1].y
+        );
+
+        int32_t distance_delta = (int32_t)current_distance - (int32_t)zoom_initial_distance;
+
+        // Zoom In: fingers spreading apart
+        if (distance_delta > ZOOM_THRESHOLD) {
+            tap_code16(g_via_dilemma_config.pinch_zoom_in_keycode);
+            zoom_gesture_active = false;  // Reset after trigger
+        }
+        // Zoom Out: fingers pinching together
+        else if (distance_delta < -ZOOM_THRESHOLD) {
+            tap_code16(g_via_dilemma_config.pinch_zoom_out_keycode);
+            zoom_gesture_active = false;  // Reset after trigger
+        }
+    }
+
+    // Reset zoom state if fingers lifted
+    if (contacts != 2) {
+        zoom_gesture_active = false;
+    }
+
+    // ... existing code ...
+}
+```
+
+---
+
+### 3. State Machine Extension
+
+#### 3.1 Add Zoom State
+
+**Updated State Enum:**
+```c
+typedef enum {
+    None,           // No gesture in progress
+    Down,           // Finger(s) on surface
+    MoveScroll,     // Moving or scrolling
+    Tapped,         // Tap detected
+    DoubleTapped,   // Double-tap detected
+    Drag,           // Dragging
+    Swipe,          // Multi-finger swipe
+    Zoom,           // Pinch-to-zoom (NEW)
+    Finished        // Gesture complete, waiting for lift
+} State;
+```
+
+#### 3.2 Zoom State Entry Detection
+
+**Entry Conditions:**
+```c
+case Down: {
+    // ... existing code ...
+
+    // NEW: Enter Zoom state on 2-finger spread/pinch
+    if (contacts == 2) {
+        uint16_t initial_distance = calculate_distance(
+            report->fingers[0].x, report->fingers[0].y,
+            report->fingers[1].x, report->fingers[1].y
+        );
+        zoom_initial_distance = initial_distance;
+        state = Zoom;
+    }
+
+    // ... existing code ...
+}
+```
+
+#### 3.3 Zoom State Logic
+
+**Zoom State Case:**
+```c
+case Zoom: {
+    if (contacts == 0) {
+        state = None;
+        zoom_gesture_active = false;
+    } else if (contacts == 2) {
+        uint16_t current_distance = calculate_distance(
+            report->fingers[0].x, report->fingers[0].y,
+            report->fingers[1].x, report->fingers[1].y
+        );
+
+        int32_t distance_delta = (int32_t)current_distance - (int32_t)zoom_initial_distance;
+
+        // Zoom In: fingers spreading apart
+        if (distance_delta > ZOOM_THRESHOLD) {
+            if (g_via_dilemma_config.pinch_to_zoom_enabled) {
+                tap_code16(g_via_dilemma_config.pinch_zoom_in_keycode);
+            }
+            state = Finished;
+        }
+        // Zoom Out: fingers pinching together
+        else if (distance_delta < -ZOOM_THRESHOLD) {
+            if (g_via_dilemma_config.pinch_to_zoom_enabled) {
+                tap_code16(g_via_dilemma_config.pinch_zoom_out_keycode);
+            }
+            state = Finished;
+        }
+
+        // Update tracking distance for continuous detection
+        zoom_initial_distance = current_distance;
+    } else {
+        // Finger count changed, exit Zoom state
+        state = MoveScroll;
+        zoom_gesture_active = false;
+    }
+    break;
+}
+```
+
+---
+
+### 4. Keycode Mappings
+
+#### 4.1 Default Zoom Keycodes
+
+**Common Zoom Shortcuts:**
+```c
+// macOS standard zoom shortcuts
+#define ZOOM_IN_DEFAULT  KC_EQUAL    // Cmd+Plus (zoom in)
+#define ZOOM_OUT_DEFAULT KC_MINUS    // Cmd+Minus (zoom out)
+
+// Alternative: Browser zoom
+#define ZOOM_IN_ALT     LCTL(KC_EQUAL)   // Ctrl+Plus
+#define ZOOM_OUT_ALT    LCTL(KC_MINUS)   // Ctrl+Minus
+```
+
+**Rationale:**
+- `KC_EQUAL` (=/+ key) is standard for "zoom in" (Cmd+Plus, Ctrl+Plus)
+- `KC_MINUS` (-/_ key) is standard for "zoom out" (Cmd+Minus, Ctrl+Minus)
+- Works across macOS, Windows, Linux browsers
+- Simple, universal mapping
+
+#### 4.2 VIA Configuration
+
+**EEPROM Fields (dilemma.h):**
+```c
+// Bytes 26-29: Pinch-to-zoom keycodes (4 bytes)
+uint16_t pinch_zoom_in_keycode;   // Byte 26-27
+uint16_t pinch_zoom_out_keycode;  // Byte 28-29
+```
+
+**VIA Value IDs (dilemma.h):**
+```c
+enum via_dilemma_value_id {
+    // ... existing IDs 0-15 ...
+
+    // NEW: Pinch-to-zoom keycodes (IDs 16-17)
+    id_dilemma_pinch_zoom_in = 16,
+    id_dilemma_pinch_zoom_out = 17,
+};
+```
+
+**Default Initialization (dilemma.c):**
+```c
+void eeconfig_init_kb(void) {
+    // ... existing code ...
+
+    // Initialize zoom keycodes with defaults
+    g_via_dilemma_config.pinch_zoom_in_keycode = KC_EQUAL;
+    g_via_dilemma_config.pinch_zoom_out_keycode = KC_MINUS;
+    g_via_dilemma_config.pinch_to_zoom_enabled = 0;  // Disabled by default (opt-in)
+
+    // ... existing code ...
+}
+```
+
+---
+
+### 5. Integration Points
+
+#### 5.1 VIA Config Enable Check
+
+**Enable Flag (already reserved in EEPROM byte 7):**
+```c
+// dilemma.h:112
+uint8_t pinch_to_zoom_enabled : 1;  // Smart zoom
+```
+
+**Usage in State Machine:**
+```c
+case Zoom: {
+    // ... distance calculation ...
+
+    if (distance_delta > ZOOM_THRESHOLD) {
+        // Check VIA config before triggering
+        if (g_via_dilemma_config.pinch_to_zoom_enabled) {
+            tap_code16(g_via_dilemma_config.pinch_zoom_in_keycode);
+        }
+        state = Finished;
+    }
+    // ... zoom out logic ...
+}
+```
+
+#### 5.2 Gesture State Tracking
+
+**Update g_gesture_state (dilemma.c):**
+```c
+static void update_gesture_state(void) {
+    // TODO: Implement actual digitizer gesture read based on 03-01 findings
+    // For now, this is a placeholder
+
+    // NEW: Plan 04-05 will integrate Zoom state tracking
+    // - Access digitizer state machine to get zoom state
+    // - Update g_gesture_state.zoom based on active gesture
+    // - This will be used by VIA config to enable/disable zoom
+}
+```
+
+**Public API Accessor (already exists):**
+```c
+// dilemma.h:212 (from Phase 3)
+bool dilemma_get_zoom(void);  // Already declared
+```
+
+---
+
+### 6. Complexity Assessment
+
+#### 6.1 Technical Complexity: **Medium**
+
+**Challenges:**
+- Distance calculation requires math operations (sqrt or squared comparison)
+- State machine extension adds new gesture type
+- Threshold tuning required for usability
+- Finger tracking needs 2-point coordinate management
+
+**Mitigations:**
+- Use squared distance comparison (avoids sqrt, simpler)
+- Start with conservative threshold (tune later based on testing)
+- Follow existing Swipe state pattern (proven architecture)
+- Pinch-to-zoom is optional (opt-in via VIA)
+
+#### 6.2 Implementation Complexity: **Low**
+
+**Reasons:**
+- Clear integration points (state machine extension)
+- Follows Phase 3 patterns (gesture enable flags, keycode mappings)
+- VIA config infrastructure already exists
+- Public API accessors already declared
+
+**Estimated Effort:**
+- Firmware changes: ~50 lines of code
+- VIA integration: ~20 lines of code
+- Testing: Threshold tuning, keycode verification
+- Total: 1-2 hours implementation + testing
+
+#### 6.3 Risk Assessment
+
+**Low Risk Areas:**
+- Zoom gesture is opt-in (disabled by default)
+- Doesn't affect existing gestures (separate state)
+- No EEPROM breaking changes (bytes 26-29 already reserved)
+- Follows established patterns from Swipe gesture
+
+**Medium Risk Areas:**
+- Distance calculation accuracy (threshold tuning)
+- False positive detection (accidental zoom triggers)
+- Performance overhead (distance calculations every frame)
+
+**Mitigations:**
+- Start with high threshold (reduce false positives)
+- Add gesture duration check (prevent quick accidental triggers)
+- Optimize distance calculation (use integer math, no sqrt)
+- Extensive testing with real hardware
+
+---
+
+## Summary of Pinch-to-Zoom Algorithm
+
+**Gesture Detection:**
+1. Two fingers enter Down state → Calculate initial distance D1
+2. Fingers move → Calculate current distance D2
+3. If |D2 - D1| > threshold → Trigger zoom keycode
+4. Reset state after trigger or on finger lift
+
+**State Machine Changes:**
+- Add Zoom state to enum
+- Enter Zoom on 2-finger contact
+- Detect zoom_in vs zoom_out based on distance delta
+- Tap keycode based on direction
+
+**Keycode Mappings:**
+- Zoom In: KC_EQUAL (plus/equals key, Cmd/Ctrl+Plus)
+- Zoom Out: KC_MINUS (minus key, Cmd/Ctrl+Minus)
+- Configurable via VIA (bytes 26-29)
+
+**Integration:**
+- Check pinch_to_zoom_enabled from VIA config
+- Call tap_code() for zoom keycodes
+- Filter via g_gesture_state.zoom (already exists from Phase 3)
+
+**Complexity:**
+- Medium technical complexity (distance calculation, threshold tuning)
+- Low implementation complexity (follows existing patterns)
+- Low risk (opt-in feature, separate from existing gestures)
+
+---
+
+**Next Section:** Implementation Strategy for Phase 4
