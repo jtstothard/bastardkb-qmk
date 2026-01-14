@@ -56,6 +56,22 @@
 #        define DIGITIZER_SWIPE_DOWN_KC KC_ESC
 #    endif
 
+#    ifndef DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC
+#        define DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC LCTL(KC_LEFT)  // Ctrl+Left (spaces left)
+#    endif
+
+#    ifndef DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC
+#        define DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC LCTL(KC_RIGHT)  // Ctrl+Right (spaces right)
+#    endif
+
+#    ifndef DIGITIZER_FOUR_FINGER_SWIPE_UP_KC
+#        define DIGITIZER_FOUR_FINGER_SWIPE_UP_KC KC_F11  // Show desktop (F11 on macOS)
+#    endif
+
+#    ifndef DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC
+#        define DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC KC_F10  // Expose/app windows (F10 on macOS)
+#    endif
+
 #    ifndef DIGITIZER_MIN_CPI
 #        define DIGITIZER_MIN_CPI 50
 #    endif
