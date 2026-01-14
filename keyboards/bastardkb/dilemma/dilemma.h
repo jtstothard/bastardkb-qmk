@@ -196,4 +196,13 @@ bool dilemma_get_pointer_dragscroll_enabled(void);
  * are translated into horizontal and vertical scroll movements.
  */
 void dilemma_set_pointer_dragscroll_enabled(bool enable);
+
+// Gesture state accessors
+bool dilemma_get_single_tap(void);
+bool dilemma_get_two_finger_tap(void);
+bool dilemma_get_swipe_right(void);
+bool dilemma_get_swipe_left(void);
+bool dilemma_get_swipe_up(void);
+bool dilemma_get_swipe_down(void);
+bool dilemma_get_press_and_hold(void);
 #endif // POINTING_DEVICE_ENABLE

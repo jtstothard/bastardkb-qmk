@@ -203,6 +203,35 @@ void dilemma_set_pointer_dragscroll_enabled(bool enable) {
     maybe_update_pointing_device_cpi(&g_dilemma_config);  // Old system
 }
 
+// Gesture state accessor implementations
+bool dilemma_get_single_tap(void) {
+    return g_gesture_state.single_tap;
+}
+
+bool dilemma_get_two_finger_tap(void) {
+    return g_gesture_state.two_finger_tap;
+}
+
+bool dilemma_get_swipe_right(void) {
+    return g_gesture_state.swipe_x_plus;
+}
+
+bool dilemma_get_swipe_left(void) {
+    return g_gesture_state.swipe_x_minus;
+}
+
+bool dilemma_get_swipe_up(void) {
+    return g_gesture_state.swipe_y_plus;
+}
+
+bool dilemma_get_swipe_down(void) {
+    return g_gesture_state.swipe_y_minus;
+}
+
+bool dilemma_get_press_and_hold(void) {
+    return g_gesture_state.press_and_hold;
+}
+
 /**
  * \brief Update scroll divisors based on current mode and VIA config.
  *
