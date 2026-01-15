@@ -58,6 +58,11 @@
 #        define DILEMMA_DRAGSCROLL_BUFFER_SIZE 6
 #    endif // !DILEMMA_DRAGSCROLL_BUFFER_SIZE
 
+// Forward declarations for static functions
+static void apply_via_dilemma_config(void);
+static void read_via_dilemma_config(void);
+static void write_via_dilemma_config(void);
+
 typedef union {
     uint8_t raw;
     struct {
@@ -69,6 +74,9 @@ typedef union {
 } dilemma_config_t;
 
 static dilemma_config_t g_dilemma_config = {0};
+
+// VIA custom configuration
+via_dilemma_config_t g_via_dilemma_config = {0};
 
 // Global scroll divisor tracking variables
 // These track the current scroll divisors based on mode (drag-scroll vs two-finger)
@@ -189,8 +197,8 @@ bool dilemma_get_pointer_sniping_enabled(void) {
 
 void dilemma_set_pointer_sniping_enabled(bool enable) {
     g_dilemma_config.is_sniping_enabled = enable;
-    apply_via_dilemma_config();                      // Apply VIA DPI settings
-    maybe_update_pointing_device_cpi(&g_dilemma_config);  // Old system
+    // ONLY apply VIA config - the old system overrides the VIA sniping_dpi value!
+    apply_via_dilemma_config();
 }
 
 bool dilemma_get_pointer_dragscroll_enabled(void) {
@@ -445,15 +453,23 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
  * When auto_snipe_enabled is true and auto_snipe_layer becomes active,
  * automatically enable sniping mode. When leaving that layer, disable sniping.
  */
-layer_state_t layer_state_set_user(layer_state_t state) {
-    // Check if auto-sniping is enabled in VIA config
-    if (g_via_dilemma_config.auto_snipe_enabled) {
-        uint8_t target_layer = g_via_dilemma_config.auto_snipe_layer;
+layer_state_t layer_state_set_kb(layer_state_t state) {
+    // Debug: Log all layer state changes
+    uprintf("LAYER STATE: state=0x%X, target_layer=%d\n",
+            state, g_via_dilemma_config.auto_snipe_layer);
 
+    // Auto-snipe is controlled by the layer value:
+    // - 127 means auto-snipe is disabled
+    // - 0-126 means auto-snipe is enabled for that layer
+    uint8_t target_layer = g_via_dilemma_config.auto_snipe_layer;
+
+    // 127 means auto-snipe is disabled
+    if (target_layer != 127) {
         // Check if target layer is in current layer state
         if (state & (1 << target_layer)) {
             // Target layer is active, enable sniping
             if (!dilemma_get_pointer_sniping_enabled()) {
+                uprintf("AUTO-SNIPE: Layer %d active, enabling sniping\n", target_layer);
                 dilemma_set_pointer_sniping_enabled(true);
             }
         } else {
@@ -461,13 +477,14 @@ layer_state_t layer_state_set_user(layer_state_t state) {
             if (dilemma_get_pointer_sniping_enabled()) {
                 // Only disable if no manual sniping key is held
                 // (auto-snipe should not interfere with manual sniping)
+                uprintf("AUTO-SNIPE: Layer %d inactive, disabling sniping\n", target_layer);
                 dilemma_set_pointer_sniping_enabled(false);
             }
         }
     }
 
-    // Call existing keymap layer_state_set_user if defined
-    return layer_state_set_user_kb(state);
+    // Call user-level layer_state_set_user
+    return layer_state_set_user(state);
 }
 
 #    if defined(POINTING_DEVICE_ENABLE) && !defined(NO_DILEMMA_KEYCODES)
@@ -571,7 +588,7 @@ void eeconfig_init_kb(void) {
     write_dilemma_config_to_eeprom(&g_dilemma_config);
 
     // Initialize VIA custom config defaults
-    g_via_dilemma_config.raw = 0;
+    memset(&g_via_dilemma_config, 0, sizeof(g_via_dilemma_config));
     g_via_dilemma_config.dpi_preset = 3; // 1000 DPI default
     g_via_dilemma_config.drag_scroll_x_divisor = 8; // Reasonable defaults
     g_via_dilemma_config.drag_scroll_y_divisor = 8;
@@ -606,7 +623,8 @@ void eeconfig_init_kb(void) {
 
     // Auto-snipe defaults (Byte 5)
     g_via_dilemma_config.auto_snipe_enabled = 0;  // OFF by default (opt-in feature)
-    g_via_dilemma_config.auto_snipe_layer = 2;     // Default to layer 2 (common sniping layer)
+    g_via_dilemma_config.auto_snipe_layer = 4;     // Default to layer 4
+    g_via_dilemma_config.sniping_dpi = 200;        // Default sniping DPI (matches pointer_sniping_dpi = 0)
 
     g_via_dilemma_config.config_version = 1;
     write_via_dilemma_config();
@@ -619,8 +637,6 @@ void eeconfig_init_kb(void) {
 // VIA EEPROM custom config is enabled (VIA_EEPROM_CUSTOM_CONFIG_SIZE = 32)
 
 #include "via.h"
-
-via_dilemma_config_t g_via_dilemma_config = {0};
 
 /**
  * \brief Map VIA DPI preset to actual DPI value.
@@ -670,9 +686,19 @@ static uint16_t get_dpi_from_preset(uint8_t preset) {
  * Follows the same pattern as maybe_update_pointing_device_cpi().
  */
 static void apply_via_dilemma_config(void) {
-    uint16_t dpi = get_dpi_from_preset(g_via_dilemma_config.dpi_preset);
-    if (dpi > 0) {
-        pointing_device_set_cpi(dpi);
+    // Check if sniping is enabled, use VIA sniping DPI if so
+    if (dilemma_get_pointer_sniping_enabled()) {
+        // Use VIA-configured sniping DPI (50-800 range)
+        uint16_t sniping_dpi = g_via_dilemma_config.sniping_dpi;
+        if (sniping_dpi >= 50 && sniping_dpi <= 800) {
+            pointing_device_set_cpi(sniping_dpi);
+        }
+    } else {
+        // Use normal DPI preset
+        uint16_t dpi = get_dpi_from_preset(g_via_dilemma_config.dpi_preset);
+        if (dpi > 0) {
+            pointing_device_set_cpi(dpi);
+        }
     }
     // Update scroll divisors after VIA config changes
     update_scroll_divisors();
@@ -683,12 +709,12 @@ static void apply_via_dilemma_config(void) {
 
 // Read custom config from EEPROM
 static void read_via_dilemma_config(void) {
-    nvm_via_read_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
+    via_read_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
 }
 
 // Write custom config to EEPROM
 static void write_via_dilemma_config(void) {
-    nvm_via_update_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
+    via_update_custom_config(g_via_dilemma_config.raw, 0, sizeof(g_via_dilemma_config.raw));
 }
 
 // VIA custom value command handler
@@ -793,6 +819,21 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                         g_via_dilemma_config.auto_snipe_layer = value_data[0];
                     }
                     break;
+                case id_dilemma_sniping_dpi:
+                    // 8-bit value (50-200 range) - dropdown only sends one byte
+                    {
+                        uint16_t sniping_dpi = value_data[0];
+                        if (sniping_dpi < 50) sniping_dpi = 50;
+                        if (sniping_dpi > 200) sniping_dpi = 200;
+                        g_via_dilemma_config.sniping_dpi = sniping_dpi;
+                        uprintf("VIA SET: Sniping DPI=%d (was %d)\n", sniping_dpi, value_data[0]);
+                        // Apply immediately if sniping is currently enabled
+                        if (dilemma_get_pointer_sniping_enabled()) {
+                            pointing_device_set_cpi(g_via_dilemma_config.sniping_dpi);
+                            uprintf("VIA SET: Applied sniping DPI=%d immediately\n", g_via_dilemma_config.sniping_dpi);
+                        }
+                    }
+                    break;
                 // Add more setters for each value_id
                 default:
                     *command_id = id_unhandled; // Unknown value ID
@@ -888,6 +929,10 @@ void via_custom_value_command_kb(uint8_t *data, uint8_t length) {
                     break;
                 case id_dilemma_auto_snipe_layer:
                     value_data[0] = g_via_dilemma_config.auto_snipe_layer;
+                    break;
+                case id_dilemma_sniping_dpi:
+                    value_data[0] = g_via_dilemma_config.sniping_dpi & 0xFF;
+                    value_data[1] = (g_via_dilemma_config.sniping_dpi >> 8) & 0xFF;
                     break;
                 // Add more getters for each value_id
                 default:

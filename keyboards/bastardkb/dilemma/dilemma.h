@@ -77,11 +77,9 @@ enum via_dilemma_value_id {
     // Auto-snipe configuration (Byte 5)
     id_dilemma_auto_snipe_enable = 25,   // Enable/disable auto-sniping on layer
     id_dilemma_auto_snipe_layer = 26,    // Target layer for auto-sniping (0-127)
+    id_dilemma_sniping_dpi = 27,         // DPI value for sniping mode (50-800)
     // Add more IDs as needed for phases 8-12
 };
-
-// Global config instance (defined in dilemma.c)
-extern via_dilemma_config_t g_via_dilemma_config;
 
 /**
  * VIA Custom Configuration EEPROM Layout
@@ -119,51 +117,54 @@ typedef union {
         uint8_t auto_snipe_enabled : 1;    // Enable/disable
         uint8_t auto_snipe_layer : 7;      // Target layer (0-127)
 
-        // Byte 6: Basic gesture enables
+        // Bytes 6-7: Sniping DPI (16-bit value, 50-800 range)
+        uint16_t sniping_dpi;              // DPI for sniping mode
+
+        // Byte 8: Basic gesture enables
         uint8_t tap_to_click_enabled : 1;   // Single-finger tap
         uint8_t two_finger_tap_enabled : 1; // Right-click equivalent
         uint8_t two_finger_scroll_enabled : 1; // Scroll gesture
         uint8_t press_and_hold_enabled : 1;  // Long-press selection
-        uint8_t reserved_6 : 4;            // Future gesture enables
+        uint8_t reserved_8 : 4;            // Future gesture enables
 
-        // Byte 7: Advanced gesture enables
+        // Byte 9: Advanced gesture enables
         uint8_t three_finger_swipe_enabled : 1; // App switcher
         uint8_t four_finger_swipe_enabled : 1;  // Desktop spaces
         uint8_t pinch_to_zoom_enabled : 1;      // Smart zoom
-        uint8_t reserved_7 : 5;                // Future advanced gestures
+        uint8_t reserved_9 : 5;                // Future advanced gestures
 
-        // Bytes 8-19: Basic gesture-to-keycode mappings (12 bytes)
+        // Bytes 10-21: Basic gesture-to-keycode mappings (12 bytes)
         // Each gesture maps to a 16-bit keycode
-        uint16_t tap_to_click_keycode;         // Byte 8-9
-        uint16_t two_finger_tap_keycode;       // Byte 10-11
-        uint16_t two_finger_scroll_up_keycode; // Byte 12-13
-        uint16_t two_finger_scroll_down_keycode; // Byte 14-15
-        uint16_t press_and_hold_keycode;       // Byte 16-17
+        uint16_t tap_to_click_keycode;         // Byte 10-11
+        uint16_t two_finger_tap_keycode;       // Byte 12-13
+        uint16_t two_finger_scroll_up_keycode; // Byte 14-15
+        uint16_t two_finger_scroll_down_keycode; // Byte 16-17
+        uint16_t press_and_hold_keycode;       // Byte 18-19
 
-        // Bytes 18-25: 3-finger swipe keycodes (8 bytes, 16-bit each)
-        uint16_t three_finger_swipe_left_keycode;   // Byte 18-19
-        uint16_t three_finger_swipe_right_keycode;  // Byte 20-21
-        uint16_t three_finger_swipe_up_keycode;     // Byte 22-23
-        uint16_t three_finger_swipe_down_keycode;   // Byte 24-25
+        // Bytes 20-27: 3-finger swipe keycodes (8 bytes, 16-bit each)
+        uint16_t three_finger_swipe_left_keycode;   // Byte 20-21
+        uint16_t three_finger_swipe_right_keycode;  // Byte 22-23
+        uint16_t three_finger_swipe_up_keycode;     // Byte 24-25
+        uint16_t three_finger_swipe_down_keycode;   // Byte 26-27
 
-        // Bytes 26-33: 4-finger swipe keycodes (8 bytes, 16-bit each)
-        uint16_t four_finger_swipe_left_keycode;    // Byte 26-27
-        uint16_t four_finger_swipe_right_keycode;   // Byte 28-29
-        uint16_t four_finger_swipe_up_keycode;      // Byte 30-31
-        uint16_t four_finger_swipe_down_keycode;    // Byte 32-33
+        // Bytes 28-35: 4-finger swipe keycodes (8 bytes, 16-bit each)
+        uint16_t four_finger_swipe_left_keycode;    // Byte 28-29
+        uint16_t four_finger_swipe_right_keycode;   // Byte 30-31
+        uint16_t four_finger_swipe_up_keycode;      // Byte 32-33
+        uint16_t four_finger_swipe_down_keycode;    // Byte 34-35
 
-        // Bytes 34-37: Pinch-to-zoom keycodes (4 bytes, 16-bit each)
-        uint16_t zoom_in_keycode;   // Byte 34-35
-        uint16_t zoom_out_keycode;  // Byte 36-37
+        // Bytes 36-39: Pinch-to-zoom keycodes (4 bytes, 16-bit each)
+        uint16_t zoom_in_keycode;   // Byte 36-37
+        uint16_t zoom_out_keycode;  // Byte 38-39
 
-        // Bytes 38-39: Smart gesture features
+        // Bytes 40-41: Smart gesture features
         uint8_t tap_pressure_threshold : 4;    // 0-15 (sensitivity)
         uint8_t force_click_enabled : 1;       // Long-press force click
         uint8_t smart_zoom_enabled : 1;        // Pinch-to-zoom enhancement
-        uint8_t reserved_38 : 2;              // Future smart features
+        uint8_t reserved_40 : 2;              // Future smart features
 
-        // Bytes 40-61: Reserved for future expansion (22 bytes)
-        uint8_t reserved_40[22];              // Phase 10+ features
+        // Bytes 42-61: Reserved for future expansion (20 bytes)
+        uint8_t reserved_42[20];              // Phase 10+ features
 
         // Bytes 62-63: Versioning and final reserved
         uint8_t config_version : 4;           // EEPROM format version

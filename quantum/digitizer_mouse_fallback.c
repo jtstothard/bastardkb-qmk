@@ -12,10 +12,15 @@
 #    include "timer.h"
 #    include "action.h"
 
+// Include VIA config from dilemma.h if available
+#    if defined(KEYBOARD_bastardkb_dilemma)
+#        include "keyboards/bastardkb/dilemma/dilemma.h"
+#    else
 // Forward declaration for VIA config (defined in dilemma.h)
 typedef struct {
     uint8_t raw[64];
 } via_dilemma_config_t;
+#    endif
 
 #    ifndef DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT
 #        define DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT 200
@@ -54,7 +59,7 @@ typedef struct {
 #    endif
 
 #    ifndef DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD
-#        define DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD 10000  // Squared distance change for zoom (100px²)
+#        define DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD 200000  // Minimum squared distance change for zoom (prevents accidental triggers during scrolling)
 #    endif
 
 #    ifndef DIGITIZER_ZOOM_IN_KC
@@ -159,7 +164,7 @@ static bool digitizer_mouse_fallback_init(void)
 #define SPIKE_SCAN_FRAMES 150         /* Max frames to scan for spike after CPI change */
 static uint16_t g_frames_since_cpi_change;  /* Frame counter since last CPI change */
 static bool     g_spike_found;               /* Whether we've found and discarded the spike */
-static uint8_t  g_last_cpi;                  /* Track CPI changes to detect transitions */
+static uint16_t g_last_cpi = 0;              /* Track CPI changes to detect transitions (uint16 to support DPI up to 1200) */
 
 static report_mouse_t digitizer_get_mouse_report(report_mouse_t _mouse_report) {
     if (digitizer_send_mouse_reports) {
@@ -216,7 +221,7 @@ static void digitizer_set_cpi(uint16_t cpi) {
 }
 
 // The gesture detection state machine will transition between these states.
-typedef enum { None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Zoom, Finished } State;
+typedef enum { None, Down, MoveScroll, Tapped, DoubleTapped, Drag, Swipe, Finished } State;
 
 static State state     = None;
 static int   tap_count = 0;
@@ -282,9 +287,22 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             contacts++;
         }
     }
+
+    // Log detailed finger info when more than 2 fingers detected
+    if (contacts >= 3) {
+        uprintf("GESTURE: Finger detail - total=%d [", contacts);
+        for (int i = 0; i < DIGITIZER_FINGER_COUNT; i++) {
+            if (report->fingers[i].tip) {
+                uprintf("F%d@(%d,%d) ", i, report->fingers[i].x, report->fingers[i].y);
+            }
+        }
+        uprintf("]\n");
+    }
+
     switch (state) {
         case None: {
             if (contacts != 0) {
+                uprintf("GESTURE: None->Down, contacts=%d\n", contacts);
                 state              = Down;
                 contact_start_time = timer_read32();
                 contact_start_x    = x;
@@ -300,6 +318,7 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
 
             // Check for force click (long press)
             if (duration > DIGITIZER_FORCE_CLICK_TIMEOUT && g_via_dilemma_config.press_and_hold_enabled) {
+                uprintf("GESTURE: Force click detected (duration=%ldms)\n", (long)duration);
                 // Force click detected - trigger press_and_hold keycode
                 uint16_t force_click_code = g_via_dilemma_config.press_and_hold_keycode;
                 if (force_click_code != 0) {
@@ -307,14 +326,16 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                 }
                 state = Finished;  // Exit after force click
             } else if (contacts == 0) {
+                uprintf("GESTURE: Down->Tapped, contacts=%d\n", tap_contacts);
                 state              = Tapped;
                 contact_start_time = timer_read32();
             } else if (contacts >= 3) {
                 swipe_finger_count = contacts;  // Store exact finger count
+                uprintf("GESTURE: Down->Swipe, fingers=%d\n", swipe_finger_count);
                 state = Swipe;
             } else if (duration > DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT || distance_x > DIGITIZER_MOUSE_TAP_DISTANCE || distance_y > DIGITIZER_MOUSE_TAP_DISTANCE) {
                 if (contacts == 2) {
-                    // Potential zoom gesture - capture initial finger positions
+                    // Capture initial finger positions for potential zoom
                     int finger_idx = 0;
                     for (int i = 0; i < DIGITIZER_FINGER_COUNT && finger_idx < 2; i++) {
                         if (report->fingers[i].tip) {
@@ -329,8 +350,12 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                         }
                     }
                     zoom_initial_distance = calculate_squared_distance(zoom_finger1_x, zoom_finger1_y, zoom_finger2_x, zoom_finger2_y);
-                    state = Zoom;
+                    uprintf("GESTURE: Down->MoveScroll (2 fingers, tracking for zoom, dist=%d)\n", zoom_initial_distance);
+                    // Always go to MoveScroll for 2 fingers, but track distance for pinch detection
+                    state = MoveScroll;
                 } else {
+                    // Single finger movement
+                    uprintf("GESTURE: Down->MoveScroll (contacts=%d)\n", contacts);
                     state = MoveScroll;
                 }
             }
@@ -347,6 +372,69 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
                 }
                 last_x = x;
                 last_y = y;
+            } else if (contacts == 2 && g_via_dilemma_config.pinch_to_zoom_enabled) {
+                // Check for pinch-to-zoom gesture while in scroll mode
+                // Find the two active fingers
+                int finger_idx = 0;
+                for (int i = 0; i < DIGITIZER_FINGER_COUNT && finger_idx < 2; i++) {
+                    if (report->fingers[i].tip) {
+                        if (finger_idx == 0) {
+                            zoom_finger1_x = report->fingers[i].x;
+                            zoom_finger1_y = report->fingers[i].y;
+                        } else {
+                            zoom_finger2_x = report->fingers[i].x;
+                            zoom_finger2_y = report->fingers[i].y;
+                        }
+                        finger_idx++;
+                    }
+                }
+
+                // Calculate current distance between fingers
+                zoom_current_distance = calculate_squared_distance(zoom_finger1_x, zoom_finger1_y, zoom_finger2_x, zoom_finger2_y);
+                const int32_t distance_delta = zoom_current_distance - zoom_initial_distance;
+                // DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD is already a squared distance, don't square it again
+                const int32_t threshold = DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD;
+
+                // Log every few frames to see what's happening
+                static int zoom_log_count = 0;
+                if (++zoom_log_count % 10 == 0) {
+                    uprintf("GESTURE: Zoom check - initial=%ld, current=%ld, delta=%ld, threshold=%ld\n",
+                            (long)zoom_initial_distance, (long)zoom_current_distance, (long)distance_delta, (long)threshold);
+                }
+
+                if (abs(distance_delta) > threshold) {
+                    // Pinch gesture detected!
+                    uprintf("GESTURE: Pinch detected! delta=%ld (zoom %s)\n",
+                            (long)distance_delta, distance_delta > 0 ? "IN" : "OUT");
+
+                    if (distance_delta > 0) {
+                        // Fingers moved apart = zoom in
+                        uint16_t zoom_in_code = g_via_dilemma_config.zoom_in_keycode;
+                        if (zoom_in_code != 0) {
+                            tap_code(zoom_in_code);
+                        }
+                    } else {
+                        // Fingers moved together = zoom out
+                        uint16_t zoom_out_code = g_via_dilemma_config.zoom_out_keycode;
+                        if (zoom_out_code != 0) {
+                            tap_code(zoom_out_code);
+                        }
+                    }
+                    // Reset initial distance to detect continuous zooming
+                    zoom_initial_distance = zoom_current_distance;
+                }
+
+                // Also do normal scrolling
+                static int carry_h = 0;
+                static int carry_v = 0;
+                const int  h       = x - last_x + carry_h;
+                const int  v       = y - last_y + carry_v;
+
+                carry_h = h % DIGITIZER_SCROLL_DIVISOR;
+                carry_v = v % DIGITIZER_SCROLL_DIVISOR;
+
+                mouse_report.h = h / DIGITIZER_SCROLL_DIVISOR;
+                mouse_report.v = v / DIGITIZER_SCROLL_DIVISOR;
             } else if (contacts >= 3 && duration < DIGITIZER_MOUSE_SWIPE_TIMEOUT) {
                 swipe_finger_count = contacts;  // Store exact finger count
                 state = Swipe;
@@ -368,13 +456,16 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
         case Tapped: {
             tap_contacts = MAX(contacts, tap_contacts);
             if (contacts == 0 && last_contacts != contacts) {
+                uprintf("GESTURE: Tapped, count=%d, contacts=%d\n", tap_count + 1, tap_contacts);
                 tap_count++;
                 state              = DoubleTapped;
                 contact_start_time = timer_read32();
             } else if (duration > DIGITIZER_MOUSE_TAP_DETECTION_TIMEOUT) {
                 if (contacts > 0 && state == Tapped) {
+                    uprintf("GESTURE: Tapped->Drag (hold detected)\n");
                     state = Drag;
                 } else {
+                    uprintf("GESTURE: Tapped timeout, triggering tap (count=%d, contacts=%d)\n", tap_count + 1, tap_contacts);
                     tap_count++;
                     state = Finished;
                 }
@@ -385,103 +476,57 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
             const int32_t distance_x = x - contact_start_x;
             const int32_t distance_y = y - contact_start_y;
             if (contacts == 0) {
+                uprintf("GESTURE: Swipe->None (lifted)\n");
                 state = None;
             } else if (duration > DIGITIZER_MOUSE_SWIPE_TIMEOUT) {
+                uprintf("GESTURE: Swipe timeout (duration=%ldms), distance_x=%ld, distance_y=%ld\n", (long)duration, (long)distance_x, (long)distance_y);
                 state = MoveScroll;
             } else if (digitizer_send_mouse_reports) {
                 if (distance_x > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe right
+                    uprintf("GESTURE: Swipe RIGHT, fingers=%d, 3finger_enabled=%d, 4finger_enabled=%d\n",
+                            swipe_finger_count, g_via_dilemma_config.three_finger_swipe_enabled, g_via_dilemma_config.four_finger_swipe_enabled);
                     if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_RIGHT_KC);  // 3-finger swipe right
                         state = Finished;
                     } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
-                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC);  // 4-finger swipe right
+                        tap_code16(DIGITIZER_FOUR_FINGER_SWIPE_RIGHT_KC);  // 4-finger swipe right
                         state = Finished;
                     }
                 } else if (distance_x < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_y) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe left
+                    uprintf("GESTURE: Swipe LEFT, fingers=%d, 3finger_enabled=%d, 4finger_enabled=%d\n",
+                            swipe_finger_count, g_via_dilemma_config.three_finger_swipe_enabled, g_via_dilemma_config.four_finger_swipe_enabled);
                     if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_LEFT_KC);  // 3-finger swipe left
                         state = Finished;
                     } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
-                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC);  // 4-finger swipe left
+                        tap_code16(DIGITIZER_FOUR_FINGER_SWIPE_LEFT_KC);  // 4-finger swipe left
                         state = Finished;
                     }
                 } else if (distance_y > DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe down
+                    uprintf("GESTURE: Swipe DOWN, fingers=%d, 3finger_enabled=%d, 4finger_enabled=%d\n",
+                            swipe_finger_count, g_via_dilemma_config.three_finger_swipe_enabled, g_via_dilemma_config.four_finger_swipe_enabled);
                     if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_DOWN_KC);  // 3-finger swipe down
                         state = Finished;
                     } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
-                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC);  // 4-finger swipe down
+                        tap_code16(DIGITIZER_FOUR_FINGER_SWIPE_DOWN_KC);  // 4-finger swipe down
                         state = Finished;
                     }
                 } else if (distance_y < -DIGITIZER_MOUSE_SWIPE_DISTANCE && abs(distance_x) < DIGITIZER_MOUSE_SWIPE_THRESHOLD) {
                     // Swipe up
+                    uprintf("GESTURE: Swipe UP, fingers=%d, 3finger_enabled=%d, 4finger_enabled=%d\n",
+                            swipe_finger_count, g_via_dilemma_config.three_finger_swipe_enabled, g_via_dilemma_config.four_finger_swipe_enabled);
                     if (swipe_finger_count == 3 && g_via_dilemma_config.three_finger_swipe_enabled) {
                         tap_code(DIGITIZER_SWIPE_UP_KC);  // 3-finger swipe up
                         state = Finished;
                     } else if (swipe_finger_count == 4 && g_via_dilemma_config.four_finger_swipe_enabled) {
-                        tap_code(DIGITIZER_FOUR_FINGER_SWIPE_UP_KC);  // 4-finger swipe up
+                        tap_code16(DIGITIZER_FOUR_FINGER_SWIPE_UP_KC);  // 4-finger swipe up
                         state = Finished;
                     }
                 }
-            }
-            break;
-        }
-        case Zoom: {
-            // Track both finger positions
-            if (contacts == 2) {
-                // Find the two active fingers
-                int finger_idx = 0;
-                for (int i = 0; i < DIGITIZER_FINGER_COUNT && finger_idx < 2; i++) {
-                    if (report->fingers[i].tip) {
-                        if (finger_idx == 0) {
-                            zoom_finger1_x = report->fingers[i].x;
-                            zoom_finger1_y = report->fingers[i].y;
-                        } else {
-                            zoom_finger2_x = report->fingers[i].x;
-                            zoom_finger2_y = report->fingers[i].y;
-                        }
-                        finger_idx++;
-                    }
-                }
-
-                // Calculate current distance
-                zoom_current_distance = calculate_squared_distance(zoom_finger1_x, zoom_finger1_y, zoom_finger2_x, zoom_finger2_y);
-
-                // Check if distance changed enough to trigger zoom
-                const int32_t distance_delta = zoom_current_distance - zoom_initial_distance;
-                const int32_t threshold_squared = DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD * DIGITIZER_MOUSE_ZOOM_DISTANCE_THRESHOLD;
-
-                if (abs(distance_delta) > threshold_squared) {
-                    // Zoom gesture detected
-                    if (g_via_dilemma_config.pinch_to_zoom_enabled) {
-                        if (distance_delta > 0) {
-                            // Fingers moved apart = zoom in
-                            uint16_t zoom_in_code = g_via_dilemma_config.zoom_in_keycode;
-                            if (zoom_in_code != 0) {
-                                tap_code(zoom_in_code);
-                            }
-                        } else {
-                            // Fingers moved together = zoom out
-                            uint16_t zoom_out_code = g_via_dilemma_config.zoom_out_keycode;
-                            if (zoom_out_code != 0) {
-                                tap_code(zoom_out_code);
-                            }
-                        }
-                    }
-                    state = Finished;  // Exit after triggering zoom
-                }
-
-                // Check timeout
-                if (duration > DIGITIZER_MOUSE_ZOOM_TIMEOUT) {
-                    state = None;  // Timeout, no zoom detected
-                }
-            } else if (contacts == 0) {
-                state = None;  // Fingers lifted, cancel zoom
-            } else {
-                state = MoveScroll;  // Wrong finger count, transition to scroll
             }
             break;
         }
@@ -505,14 +550,23 @@ void digitizer_update_mouse_report(report_digitizer_t *report) {
     }
     const bool button_pressed = tap || (state == Drag);
     if (report->button1 || (tap_contacts == 1 && button_pressed)) {
+        if (tap_contacts == 1 && button_pressed) {
+            uprintf("GESTURE: Tap click LEFT (1 finger)\n");
+        }
         mouse_report.buttons |= 0x1;
         if (digitizer_taps_as_clicks) report->button1 = 1;
     }
     if (report->button2 || (tap_contacts == 2 && button_pressed)) {
+        if (tap_contacts == 2 && button_pressed) {
+            uprintf("GESTURE: Tap click RIGHT (2 fingers)\n");
+        }
         mouse_report.buttons |= 0x2;
         if (digitizer_taps_as_clicks) report->button2 = 1;
     }
     if (report->button3 || (tap_contacts == 3 && button_pressed)) {
+        if (tap_contacts == 3 && button_pressed) {
+            uprintf("GESTURE: Tap click MIDDLE (3 fingers)\n");
+        }
         mouse_report.buttons |= 0x4;
         if (digitizer_taps_as_clicks) report->button3 = 1;
     }
